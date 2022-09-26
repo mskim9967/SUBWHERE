@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react';
 import { Routes, Route, useSearchParams, useNavigate } from 'react-router-dom';
 import SubwayPage from './page/SubwayPage';
 import { darkTheme, lightTheme } from './static/color';
+import { axiosInstance } from './axiosInstance';
 //test
 function App() {
   const [menuActive, setMenuActive] = useState(false);

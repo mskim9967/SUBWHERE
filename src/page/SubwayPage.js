@@ -1,15 +1,39 @@
 import { RiArrowRightSLine, RiArrowLeftSLine, RiAlarmWarningFill, RiKakaoTalkFill, RiTimeFill, RiMenuFill } from 'react-icons/ri';
 import { useEffect, useState } from 'react';
 import { Routes, Route, useSearchParams, useNavigate } from 'react-router-dom';
+import { axiosInstance } from '../axiosInstance';
+import Modal from '@mui/material/Modal';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Typography from '@mui/material/Typography';
 
 function SubwayPage({ theme, lang }) {
   const [menuActive, setMenuActive] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
+  const [modalOpen, setModalOpen] = useState(false);
+
+  const style = {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    width: 400,
+    bgcolor: 'background.paper',
+    border: '2px solid #000',
+    boxShadow: 24,
+    p: 4,
+    borderRadius: '20px',
+  };
+
   let navigate = useNavigate();
 
   useEffect(() => {
     console.log(searchParams.get('trainNo'));
+
     console.log(lang);
+    axiosInstance.get(`/subway?trainNo=${searchParams.get('trainNo')}&subwayNm=${searchParams.get('subwayNm')}`).then((res) => {
+      console.log(res.data.data);
+    });
   }, []);
 
   return (
@@ -82,9 +106,7 @@ function SubwayPage({ theme, lang }) {
           <div style={{ fontSize: '15px', fontWeight: '400', color: '#aaaaaa' }}>당산역</div>
         </div>
       </div>
-
       <div style={{ height: '80px' }} />
-
       <div style={{ display: 'flex', alignItems: 'center', gap: 3, zIndex: 10 }}>
         <img src='train_body.png' style={{ width: '36px', opacity: '25%' }} />
         <img src='train_body.png' style={{ width: '36px', opacity: '25%' }} />
@@ -140,13 +162,29 @@ function SubwayPage({ theme, lang }) {
           <br />
           공유
         </div>
-        <div style={{ width: '90px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, padding: '10px' }}>
+        <div
+          style={{ width: '90px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, padding: '10px' }}
+          onClick={() => {
+            setModalOpen(true);
+          }}
+        >
           <RiTimeFill style={{ color: '92FF6B', fontSize: '20px' }} />
           도착
           <br />
           예정시각
         </div>
       </div>
+
+      <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
+        <Box sx={style}>
+          <Typography id='modal-modal-title' variant='h6' component='h2'>
+            Text in a modal
+          </Typography>
+          <Typography id='modal-modal-description' sx={{ mt: 2 }}>
+            Duis mollis, est non commodo luctus, nisi erat porttitor ligula.
+          </Typography>
+        </Box>
+      </Modal>
     </div>
   );
 }
