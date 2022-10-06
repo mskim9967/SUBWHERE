@@ -1,18 +1,14 @@
-import logo from './logo.svg';
-import { RiArrowRightSLine, RiArrowLeftSLine, RiAlarmWarningFill, RiKakaoTalkFill, RiTimeFill, RiMenuFill } from 'react-icons/ri';
+import { RiMenuFill } from 'react-icons/ri';
 import { MdDarkMode, MdLightMode } from 'react-icons/md';
 import IconButton from '@mui/material/IconButton';
 import Button from '@mui/material/Button';
 import './App.css';
 import { useEffect, useState } from 'react';
-import { Routes, Route, useSearchParams, useNavigate } from 'react-router-dom';
+import { Routes, Route, useNavigate } from 'react-router-dom';
 import SubwayPage from './page/SubwayPage';
 import { darkTheme, lightTheme } from './static/color';
-import { axiosInstance } from './axiosInstance';
-//test
 function App() {
   const [menuActive, setMenuActive] = useState(false);
-  const [searchParams, setSearchParams] = useSearchParams();
   const [theme, setTheme] = useState(lightTheme);
   const [lang, setLang] = useState('kor');
 
@@ -23,7 +19,7 @@ function App() {
   return (
     <div className='App' style={{ backgroundColor: theme.bg1, minHeight: '100vh' }}>
       <Routes>
-        <Route path='/subway' element={<SubwayPage lang={lang} theme={theme} />}></Route>
+        <Route exact path='/subway' element={<SubwayPage lang={lang} theme={theme} />}></Route>
         <Route path='/lost-item' element={<div>lost-item</div>}></Route>
       </Routes>
 
@@ -45,25 +41,36 @@ function App() {
         onClick={() => setMenuActive(!menuActive)}
       >
         {menuActive ? (
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#000000', gap: 20, overflow: 'hidden' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: theme.text1, gap: 20, overflow: 'hidden' }}>
             <div
               onClick={() => {
                 navigate('/subway');
               }}
             >
-              지하철 정보
+              {{
+                kor:'지하철 정보',
+                eng:'subway information'
+              }[lang]}
             </div>
-            <div>역 정보</div>
+            <div>{{
+              kor:'역 정보',
+              eng:'station information'
+            }[lang]}</div>
             <div
               onClick={() => {
                 navigate('/lost-item');
               }}
             >
-              분실물 조회
+              {
+                {
+                  kor:'분실물 조회',
+                  eng:'lost and found'
+                }[lang]
+              }
             </div>
           </div>
         ) : (
-          <RiMenuFill style={{ color: '#000000', fontSize: '20px' }} />
+          <RiMenuFill style={{ color: theme.text1, fontSize: '20px' }} />
         )}
       </div>
 

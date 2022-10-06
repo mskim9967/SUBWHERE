@@ -10,6 +10,7 @@ const darkTheme = {
   gray6: '#333333',
   gray7: '#111111',
   gray8: '#000000',
+  bacco: '#333333',
 };
 
 const lightTheme = {
@@ -24,6 +25,7 @@ const lightTheme = {
   gray2: '#333333',
   gray1: '#111111',
   gray0: '#000000',
+  bacco: '#f8f8f8',
 };
 
 export { darkTheme, lightTheme };

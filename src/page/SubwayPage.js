@@ -1,16 +1,14 @@
-import { RiArrowRightSLine, RiArrowLeftSLine, RiAlarmWarningFill, RiKakaoTalkFill, RiTimeFill, RiMenuFill } from 'react-icons/ri';
+import { RiArrowRightSLine, RiArrowLeftSLine, RiAlarmWarningFill, RiKakaoTalkFill, RiTimeFill } from 'react-icons/ri';
 import { useEffect, useState } from 'react';
-import { Routes, Route, useSearchParams, useNavigate } from 'react-router-dom';
+import {  useSearchParams } from 'react-router-dom';
 import { axiosInstance } from '../axiosInstance';
 import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
-
 function SubwayPage({ theme, lang }) {
-  const [menuActive, setMenuActive] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const [modalOpen, setModalOpen] = useState(false);
+  const [trainfo,setTrainfo]=useState([]);
 
   const style = {
     position: 'absolute',
@@ -24,23 +22,24 @@ function SubwayPage({ theme, lang }) {
     p: 4,
     borderRadius: '20px',
   };
-
-  let navigate = useNavigate();
-
   useEffect(() => {
     console.log(searchParams.get('trainNo'));
-
-    console.log(lang);
-    axiosInstance.get(`/subway?trainNo=${searchParams.get('trainNo')}&subwayNm=${searchParams.get('subwayNm')}`).then((res) => {
-      console.log(res.data.data);
+    axiosInstance.get(`/subway?trainNo=${searchParams.get('trainNo')}&subwayNm=${searchParams.get('subwayNm')}`)
+    .then((res) => {
+      setTrainfo(res.data)
     });
   }, []);
 
   return (
     <div style={{ width: '100vw', padding: '100px 0px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-        <div style={{ fontSize: '15px', fontWeight: '400', color: theme.gray2 }}>22년 9월 21일(목) 17:35:14 기준</div>
-
+        <div style={{color:theme.gray1}}>{
+          {
+            kor:(new Date()).toLocaleString('ko-KR'),
+            eng:(new Date()).toLocaleString('en-US'),
+          }[lang]
+        
+        }</div>
         <div style={{ height: '10px' }} />
 
         <div style={{ fontSize: '20px', fontWeight: '500', color: theme.gray1 }}>
@@ -91,15 +90,15 @@ function SubwayPage({ theme, lang }) {
           <div style={{ fontSize: '15px', fontWeight: '400', color: '#aaaaaa' }}>신논현역</div>
           <div style={{ fontSize: '15px', fontWeight: '400', color: '#aaaaaa' }}>고속터미널역</div>
           <div style={{ position: 'relative', margin: '-7px 0' }}>
-            <div style={{ position: 'absolute', fontSize: '40px', bottom: 13, left: -60, opacity: '20%' }}>
+            <div style={{ position: 'absolute', fontSize: '40px', bottom: 13, left: -60, opacity: '20%', color:theme.gray1 }}>
               <RiArrowLeftSLine />
             </div>
 
-            <div style={{ fontSize: '70px', fontWeight: '700', letterSpacing: 3 }}>동작역</div>
-            <div style={{ position: 'absolute', fontSize: '40px', bottom: 13, right: -60 }}>
+            <div style={{ fontSize: '70px', fontWeight: '700', letterSpacing: 3,color:theme.gray1 }}>동작역</div>
+            <div style={{ position: 'absolute', fontSize: '40px', bottom: 13, right: -60 ,color:theme.gray1}}>
               <RiArrowRightSLine />
             </div>
-            <div style={{ position: 'absolute', fontSize: '27px', fontWeight: '600', right: 0 }}>접근 중</div>
+            <div style={{ position: 'absolute', fontSize: '27px', fontWeight: '600', right: 0, color:theme.gray1 }}>접근 중</div>
           </div>
           <div style={{ fontSize: '15px', fontWeight: '400', color: '#aaaaaa' }}>노량진역</div>
           <div style={{ fontSize: '15px', fontWeight: '400', color: '#aaaaaa' }}>여의도역</div>
@@ -107,16 +106,6 @@ function SubwayPage({ theme, lang }) {
         </div>
       </div>
       <div style={{ height: '80px' }} />
-      <div style={{ display: 'flex', alignItems: 'center', gap: 3, zIndex: 10 }}>
-        <img src='train_body.png' style={{ width: '36px', opacity: '25%' }} />
-        <img src='train_body.png' style={{ width: '36px', opacity: '25%' }} />
-        <img src='train_body.png' style={{ width: '36px', opacity: '100%' }} />
-        <img src='train_body.png' style={{ width: '36px', opacity: '25%' }} />
-        <img src='train_body.png' style={{ width: '36px', opacity: '25%' }} />
-        <img src='train_body.png' style={{ width: '36px', opacity: '25%' }} />
-        <img src='train_body.png' style={{ width: '36px', opacity: '25%' }} />
-        <img src='train_head.png' style={{ width: '36px', opacity: '25%' }} />
-      </div>
       <div
         style={{
           display: 'flex',
@@ -124,8 +113,8 @@ function SubwayPage({ theme, lang }) {
           height: '60px',
           fontSize: '13px',
           fontWeight: 700,
-          color: '#444444',
-          backgroundColor: '#f8f8f8',
+          color: theme.gray1,
+          backgroundColor: theme.bacco,
           padding: '20px 0',
           borderRadius: '20px',
         }}
@@ -142,9 +131,17 @@ function SubwayPage({ theme, lang }) {
           }}
         >
           <RiAlarmWarningFill style={{ color: 'FFB833', fontSize: '20px' }} />
-          신고
+          {{
+            kor:'신고',
+            eng:'report'
+          }[lang]}
           <br />
-          문의
+          {
+            {
+              kor:'문의',
+              eng:'inquiry'
+            }[lang]
+          }
         </div>
         <div
           style={{
@@ -158,9 +155,19 @@ function SubwayPage({ theme, lang }) {
           }}
         >
           <RiKakaoTalkFill style={{ color: 'FFE600', fontSize: '20px' }} />
-          현위치
+          {
+            {
+              kor:'현위치',
+              eng:'Location',
+            }[lang]
+          }
           <br />
-          공유
+          {
+            {
+              kor:'공유',
+              eng:'sharing',
+            }[lang]
+          }
         </div>
         <div
           style={{ width: '90px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, padding: '10px' }}
@@ -169,19 +176,38 @@ function SubwayPage({ theme, lang }) {
           }}
         >
           <RiTimeFill style={{ color: '92FF6B', fontSize: '20px' }} />
-          도착
+          {
+            {
+              kor:'도착',
+              eng:'ETA',
+            }[lang]
+          }
           <br />
-          예정시각
+          {
+            {
+              kor:'예정 시간',
+              eng:' ',
+            }[lang]
+          }
         </div>
       </div>
 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
         <Box sx={style}>
           <Typography id='modal-modal-title' variant='h6' component='h2'>
-            Text in a modal
+            {{
+              kor:'도착 예정 시간',
+              eng:'estimated time of arrival',
+            }[lang]
+            }
           </Typography>
           <Typography id='modal-modal-description' sx={{ mt: 2 }}>
-            Duis mollis, est non commodo luctus, nisi erat porttitor ligula.
+            {
+              {
+                kor:'동작 00:00:00 ~~',
+                eng:'dongjak 00:00:00 ing~',
+              }[lang]
+            }
           </Typography>
         </Box>
       </Modal>
