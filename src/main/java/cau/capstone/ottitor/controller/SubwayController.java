@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/subway")
@@ -18,11 +17,17 @@ public class SubwayController {
     private final SubwayService subwayService;
 
     @GetMapping(path = "")
-    public DataResponseDto<Object> test(
-        String subwayNm
-    ) {
-        return DataResponseDto.of(subwayService.test(subwayNm));
+    public DataResponseDto<Object> getRealtimeSubway(String subwayNm, String trainNo) {
+        return DataResponseDto.of(subwayService.getRealTimeSubway(subwayNm, trainNo));
     }
 
-    //fdsojfdsjsd
+    @GetMapping(path = "/realtime")
+    public DataResponseDto<Object> getRealTimeSubwayTotal(String subwayNm) {
+        return DataResponseDto.of(subwayService.testRealtimePosition(subwayNm));
+    }
+
+    @GetMapping(path = "/info")
+    public DataResponseDto<Object> getSubwayInformation(String subwayNm) {
+        return DataResponseDto.of(subwayService.testSubwayInfo(subwayNm));
+    }
 }

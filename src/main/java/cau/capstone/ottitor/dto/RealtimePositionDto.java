@@ -9,12 +9,10 @@ import lombok.Data;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class RealtimePositionDto {
 
-    private List<RealTimePosition> realtimePositionList;
-    private LocalDateTime currentTIme;
-
+    private List<RealtimePosition> realtimePositionList;
     @Data
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    public static class RealTimePosition {
+    public static class RealtimePosition {
         private String beginRow;
         private String endRow;
         private String curPage;

@@ -9,5 +9,4 @@ public class OttitorBackendApplication {
     public static void main(String[] args) {
         SpringApplication.run(OttitorBackendApplication.class, args);
     }
-
 }
