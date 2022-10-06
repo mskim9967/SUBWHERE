@@ -5,19 +5,24 @@ import { axiosInstance } from '../axiosInstance';
 import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
+import RefreshIcon from '@mui/icons-material/Refresh';
 function SubwayPage({ theme, lang }) {
   const [searchParams, setSearchParams] = useSearchParams();
   const [modalOpen, setModalOpen] = useState(false);
   const [trainfo,setTrainfo]=useState([]);
-
+  const colors=["#0d3692","#33a23d","#fe5d10","#00a2d1","#8b50a4","#c55c1d","#54640d","#f14c82","#aa9872"];
+  let asd='6호선';//subwayNm으로 체크할거임 
+  const linecolor=colors[asd.replace('호선','')-1]//subwayNm으로 체크할거임 get.replace~~
   const style = {
+    color: theme.gray1,
     position: 'absolute',
     top: '50%',
     left: '50%',
     transform: 'translate(-50%, -50%)',
     width: 400,
-    bgcolor: 'background.paper',
-    border: '2px solid #000',
+    bgcolor: theme.bg1,
+    border: '2px solid ',
+    bordercolor:theme.gray1,
     boxShadow: 24,
     p: 4,
     borderRadius: '20px',
@@ -29,7 +34,6 @@ function SubwayPage({ theme, lang }) {
       setTrainfo(res.data)
     });
   }, []);
-
   return (
     <div style={{ width: '100vw', padding: '100px 0px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -39,7 +43,11 @@ function SubwayPage({ theme, lang }) {
             eng:(new Date()).toLocaleString('en-US'),
           }[lang]
         
-        }</div>
+        }<RefreshIcon onClick={()=>
+          axiosInstance.get(`/subway?trainNo=${searchParams.get('trainNo')}&subwayNm=${searchParams.get('subwayNm')}`)
+        .then((res) => {
+          setTrainfo(res.data)
+        })}/></div>
         <div style={{ height: '10px' }} />
 
         <div style={{ fontSize: '20px', fontWeight: '500', color: theme.gray1 }}>
@@ -57,7 +65,7 @@ function SubwayPage({ theme, lang }) {
           <div
             style={{
               color: '#ffffff',
-              backgroundColor: '#B3A78A',
+              backgroundColor: linecolor,
               padding: '5px 10px',
               borderRadius: '20px',
               fontSize: '15px',
