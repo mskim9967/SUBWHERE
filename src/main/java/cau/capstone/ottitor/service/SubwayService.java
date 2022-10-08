@@ -120,7 +120,6 @@ public class SubwayService {
     }
 
     /**
-     *
      * 역이름으로 해당 역에 들어오는 실시간 열차정보 가져오는 테스트
      */
     public Object testSubwayArrival(String statnNm) {
