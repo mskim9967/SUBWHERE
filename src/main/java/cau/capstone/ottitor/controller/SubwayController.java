@@ -27,10 +27,10 @@ public class SubwayController {
         return DataResponseDto.of(subwayService.testRealtimePosition(subwayNm));
     }
 
-    @GetMapping(path = "/info")
-    public DataResponseDto<Object> getSubwayInformation(@RequestParam String subwayNm) {
-        return DataResponseDto.of(subwayService.testSubwayInfo(subwayNm));
-    }
+//    @GetMapping(path = "/info")
+//    public DataResponseDto<Object> getSubwayInformation(@RequestParam String subwayNm) {
+//        return DataResponseDto.of(subwayService.testSubwayInfo(subwayNm));
+//    }
 
     @GetMapping(path = "/arrival")
     public DataResponseDto<Object> getSubwayArrival(@RequestParam String statnNm) {

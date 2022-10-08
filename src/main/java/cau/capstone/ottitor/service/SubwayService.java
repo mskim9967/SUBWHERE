@@ -65,6 +65,7 @@ public class SubwayService {
 //        List<String> prevStatns = new ArrayList<>();
 //        List<String> nextStatns = new ArrayList<>();
 
+
         /**
          * 역 이름을 이용하여 해당 역의 실시간 도착정보를 가져온 후 열차번호를 이용하여 열차를 뽑아낸다 그 후 해당 열차가 해당 역에서 어떤방향으로 문이 열리는지 가져온다.
          */
@@ -109,7 +110,7 @@ public class SubwayService {
         restTemplate.getMessageConverters()
                 .add(0, new StringHttpMessageConverter(StandardCharsets.UTF_8));
 
-        return restTemplate.exchange(
+        return  restTemplate.exchange(
                 // %20은 공백, 공백없이 슬래시 여러개를 붙이면(///) restTemplate에서 이를 지워버림
                 "http://openapi.seoul.go.kr:8088/" + apiKey + "/json/SearchSTNBySubwayLineInfo/1/100/%20/%20/" + subwayNm,
                 HttpMethod.GET,
