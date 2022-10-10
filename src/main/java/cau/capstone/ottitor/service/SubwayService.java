@@ -62,8 +62,6 @@ public class SubwayService {
             }
         }
 
-//        List<String> prevStatns = new ArrayList<>();
-//        List<String> nextStatns = new ArrayList<>();
 
 
         /**
