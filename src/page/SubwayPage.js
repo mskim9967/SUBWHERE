@@ -15,6 +15,9 @@ function SubwayPage({ theme, lang }) {
   
   let [toastState, setToastState] = useState(false);
   
+  let [timeState, setTimeState] = useState(true);
+  
+  
   const [searchParams, setSearchParams] = useSearchParams();
   const [modalOpen, setModalOpen] = useState(false);
   const [trainfo,setTrainfo]=useState([]);
@@ -60,15 +63,12 @@ function SubwayPage({ theme, lang }) {
   });
     
 }//호선 정보 받는거
+let timer=setInterval(()=>{  
+  Inforeceive() 
+  setTimeState(timeState===true?false:true)
+  console.log("5ses")
+},5000);//5초마다 자동갱신 
 
-useEffect(() => {
-  let timer=setInterval(()=>{  
-    Inforeceive() 
-
-    
-  },5000);
-  
-}, []);//5초마다 자동갱신
 
 
   return (
@@ -76,13 +76,17 @@ useEffect(() => {
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <div style={{color:theme.gray1}}>{
           {
-            kor:(new Date()).toLocaleString('ko-KR'),
+            kor:((new Date()).toLocaleString('ko-KR')),
             eng:(new Date()).toLocaleString('en-US'),
           }[lang]
         
         }
-        <RefreshIcon onClick={()=>
-          Inforeceive()
+        <RefreshIcon onClick={()=>{
+           Inforeceive()
+           setTimeState(timeState===true?false:true)
+           console.log('click')
+        }
+         
           }/></div>
         <div style={{ height: '10px' }} />
         

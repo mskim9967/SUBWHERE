@@ -6,7 +6,7 @@ function ToastNotification(props) {
     useEffect(() => {
         let timer = setTimeout(() => {
             props.setToastState(false);		
-        }, 2500);
+        }, 10000);
 
         return () => { clearTimeout(timer) }
     }, []);
@@ -14,7 +14,7 @@ function ToastNotification(props) {
     return (
         <div className="toast-alert">
             <img alt="" src="img/alert.png" />
-            <p>{}역에 접근 중 입니다</p>
+            <p>{}동작역에 접근 중 입니다</p>
         </div>
     );
 }
