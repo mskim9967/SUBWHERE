@@ -134,15 +134,17 @@ public class SubwayService {
             System.out.println("<서동탄역 이후 역 삭제, 광명역 삭제>");
         }
 
-        // 2호선에서 출발지 또는 도착지가 성수지선일경우 나머지 역들을 삭제.
-        if (subwayNm.equals("2호선") && (curStationFrCode.contains("211-") || endStationFrCode.contains("211-"))) {
+        // 2호선에서 출발지 또는 도착지가 성수지선("211-")일경우 나머지 역들을 삭제.
+        if (subwayNm.equals("2호선") && (curStationFrCode.contains("211-") || endStationFrCode.contains("211-")) ||
+                (curStation.equals("성수지선") || endStation.equals("성수지선"))) {
             stations.removeIf(station -> !station.getFrCode().contains("211"));
 
             System.out.println("<성수지선>");
         }
 
-        // 2호선에서 출발지 또는 도착지가 신정지선일경우 나머지 역들을 삭제.
-        else if (subwayNm.equals("2호선") && (curStationFrCode.contains("234-") || endStationFrCode.contains("234-"))) {
+        // 2호선에서 출발지 또는 도착지가 신정지선("234-")일경우 나머지 역들을 삭제.
+        else if (subwayNm.equals("2호선") && (curStationFrCode.contains("234-") || endStationFrCode.contains("234-")) ||
+                (curStation.equals("신도림지선") || endStation.equals("신도림지선"))) {
             stations.removeIf(station -> !station.getFrCode().contains("234"));
             reverse = true;
 
@@ -154,7 +156,25 @@ public class SubwayService {
             stations.removeIf(station -> station.getFrCode().contains("-"));
             cycle = true;
 
+            // 도착역이 "성수종착" 인경우 도착역을 바꿔줘야함.
+            if (realtimePositionResponseDto.getStatnTnm().contains("종착")) {
+                realtimePositionResponseDto.setStatnTnm("순환");
+            }
+
             System.out.println("<순환>");
+        }
+
+        // 출발역 또는 도착역이 신정지선 또는 성수지선일 경우 "지선"을 삭제.
+        if (realtimePositionResponseDto.getStatnNm().contains("지선")) {
+            realtimePositionResponseDto.setStatnNm(
+                    realtimePositionResponseDto.getStatnNm().replace("지선", "")
+            );
+        }
+
+        if (realtimePositionResponseDto.getStatnTnm().contains("지선")) {
+            realtimePositionResponseDto.setStatnTnm(
+                    realtimePositionResponseDto.getStatnTnm().replace("지선", "")
+            );
         }
 
         // 1호선 또는 5호선에서 출발지 또는 도착지의 frCode 가 P를 포함하고 있으면, P가 아닌 분기역들을 stations 에서 삭제.
@@ -382,7 +402,6 @@ public class SubwayService {
 
         realtimePositionResponseDto.setPrevStatns(new StationNameDto(prevStatnsList));
         realtimePositionResponseDto.setNextStatns(new StationNameDto(nextStatnsList));
-
     }
 
     /**
