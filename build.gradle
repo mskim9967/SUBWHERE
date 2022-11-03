@@ -29,8 +29,10 @@ configurations {
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'mysql:mysql-connector-java'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'junit:junit:4.13.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.8.1'
 
     // lombok
     compileOnly 'org.projectlombok:lombok'
@@ -46,7 +48,7 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.9.0'
 
     // mysql connection
-    runtimeOnly 'mysql:mysql-connector-java'
+//    runtimeOnly 'mysql:mysql-connector-java'
 
     // test
     testImplementation 'org.springframework.boot:spring-boot-starter-test'

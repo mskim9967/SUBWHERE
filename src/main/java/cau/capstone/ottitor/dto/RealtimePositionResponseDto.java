@@ -14,7 +14,7 @@ public class RealtimePositionResponseDto {
     private String statnTnm;
     private Integer directAt;
     private Integer updnLine;
-    private List<SubwayNameDto.SubwayName> prevStatns;
-    private List<SubwayNameDto.SubwayName> nextStatns;
+    private StationNameDto prevStatns;
+    private StationNameDto nextStatns;
     private Integer subwayHeading;
 }
