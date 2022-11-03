@@ -6,10 +6,19 @@ import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import RefreshIcon from '@mui/icons-material/Refresh';
+import React from "react";
+import { ToastNotification } from '../ToastNotification';
+
+
+
 function SubwayPage({ theme, lang }) {
+  
+  let [toastState, setToastState] = useState(false);
+  
   const [searchParams, setSearchParams] = useSearchParams();
   const [modalOpen, setModalOpen] = useState(false);
   const [trainfo,setTrainfo]=useState([]);
+  const [nexinfo,setNexinfo]=useState([]);
   const colors=["#0d3692","#33a23d","#fe5d10","#00a2d1","#8b50a4","#c55c1d","#54640d","#f14c82","#aa9872"];
   let asd='6호선';//subwayNm으로 체크할거임 
   const linecolor=colors[asd.replace('호선','')-1]//subwayNm으로 체크할거임 get.replace~~
@@ -19,7 +28,7 @@ function SubwayPage({ theme, lang }) {
     top: '50%',
     left: '50%',
     transform: 'translate(-50%, -50%)',
-    width: 400,
+    width: 300,
     bgcolor: theme.bg1,
     border: '2px solid ',
     bordercolor:theme.gray1,
@@ -27,13 +36,41 @@ function SubwayPage({ theme, lang }) {
     p: 4,
     borderRadius: '20px',
   };
-  useEffect(() => {
-    console.log(searchParams.get('trainNo'));
-    axiosInstance.get(`/subway?trainNo=${searchParams.get('trainNo')}&subwayNm=${searchParams.get('subwayNm')}`)
-    .then((res) => {
-      setTrainfo(res.data)
+  const shareKakao = () => {
+    window.Kakao.Share.sendCustom({
+      templateId: 85076, 
+      templateArgs:{
+        title: '흑석', //trainfo.statnNm
+        state: '접근'//trainfo.trainSttus
+      },
     });
-  }, []);
+  };
+  const Nextreceive=()=>{// 도착 예정시간 받아오는거 
+  axiosInstance.get(`/subway/arrival?updnLine=${setTrainfo.updnLine}&subwayNm=${searchParams.get('subwayNm')}&statnNm=${setTrainfo.statnNm}`)
+  .then((res) => {
+    setNexinfo(res.data)
+  });
+    
+}
+  const Inforeceive=()=>{
+    console.log(searchParams.get('trainNo'));
+  axiosInstance.get(`/subway?trainNo=${searchParams.get('trainNo')}&subwayNm=${searchParams.get('subwayNm')}`)
+  .then((res) => {
+    setTrainfo(res.data)
+  });
+    
+}//호선 정보 받는거
+
+useEffect(() => {
+  let timer=setInterval(()=>{  
+    Inforeceive() 
+
+    
+  },5000);
+  
+}, []);//5초마다 자동갱신
+
+
   return (
     <div style={{ width: '100vw', padding: '100px 0px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -43,12 +80,12 @@ function SubwayPage({ theme, lang }) {
             eng:(new Date()).toLocaleString('en-US'),
           }[lang]
         
-        }<RefreshIcon onClick={()=>
-          axiosInstance.get(`/subway?trainNo=${searchParams.get('trainNo')}&subwayNm=${searchParams.get('subwayNm')}`)
-        .then((res) => {
-          setTrainfo(res.data)
-        })}/></div>
+        }
+        <RefreshIcon onClick={()=>
+          Inforeceive()
+          }/></div>
         <div style={{ height: '10px' }} />
+        
 
         <div style={{ fontSize: '20px', fontWeight: '500', color: theme.gray1 }}>
           {
@@ -70,10 +107,10 @@ function SubwayPage({ theme, lang }) {
               borderRadius: '20px',
               fontSize: '15px',
               fontWeight: 600,
-            }}
+            }}//trainfo.statnTnm
           >
-            9호선 - 중앙보훈병원 행
-          </div>
+            9호선 - 중앙보훈병원 행 
+          </div> 
 
           <div
             style={{
@@ -83,13 +120,11 @@ function SubwayPage({ theme, lang }) {
               borderRadius: '20px',
               fontSize: '15px',
               fontWeight: 600,
-            }}
+            }}//{trainfo.direcctAt===1?<p>급행열차</p>:<p>일반열차</p>}
           >
             급행열차
           </div>
-          <div style={{ color: '#ffffff', backgroundColor: '#777777', padding: '5px 10px', borderRadius: '20px', fontSize: '15px', fontWeight: 600 }}>
-            5518칸
-          </div>
+         
         </div>
 
         <div style={{ height: '40px' }} />
@@ -112,6 +147,12 @@ function SubwayPage({ theme, lang }) {
           <div style={{ fontSize: '15px', fontWeight: '400', color: '#aaaaaa' }}>여의도역</div>
           <div style={{ fontSize: '15px', fontWeight: '400', color: '#aaaaaa' }}>당산역</div>
         </div>
+        {
+          {
+            true: <ToastNotification setToastState={setToastState}></ToastNotification>,
+            false: '',
+          }[toastState]        //접근중으로 바뀌면 알림 지금은 테스트해보려고 신고문의 누르면 뜨게해둠
+        }
       </div>
       <div style={{ height: '80px' }} />
       <div
@@ -125,6 +166,7 @@ function SubwayPage({ theme, lang }) {
           backgroundColor: theme.bacco,
           padding: '20px 0',
           borderRadius: '20px',
+          
         }}
       >
         <div
@@ -138,7 +180,7 @@ function SubwayPage({ theme, lang }) {
             padding: '10px',
           }}
         >
-          <RiAlarmWarningFill style={{ color: 'FFB833', fontSize: '20px' }} />
+          <RiAlarmWarningFill onClick={()=>{setToastState(true)}} style={{ color: 'FFB833', fontSize: '20px' }} />
           {{
             kor:'신고',
             eng:'report'
@@ -161,8 +203,10 @@ function SubwayPage({ theme, lang }) {
             borderRight: 'solid white 1px',
             padding: '10px',
           }}
+        
         >
-          <RiKakaoTalkFill style={{ color: 'FFE600', fontSize: '20px' }} />
+          
+          <RiKakaoTalkFill onClick={shareKakao} style={{ color: 'FFE600', fontSize: '20px' }} />
           {
             {
               kor:'현위치',
@@ -181,6 +225,7 @@ function SubwayPage({ theme, lang }) {
           style={{ width: '90px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, padding: '10px' }}
           onClick={() => {
             setModalOpen(true);
+            Nextreceive();
           }}
         >
           <RiTimeFill style={{ color: '92FF6B', fontSize: '20px' }} />
