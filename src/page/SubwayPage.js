@@ -11,19 +11,20 @@ import { ToastNotification } from '../ToastNotification';
 
 
 
+
+
 function SubwayPage({ theme, lang }) {
   
+  const [nowtrain, setNowtrain] = useState(true);
+
   let [toastState, setToastState] = useState(false);
-  
   let [timeState, setTimeState] = useState(true);
-  
-  
   const [searchParams, setSearchParams] = useSearchParams();
   const [modalOpen, setModalOpen] = useState(false);
   const [trainfo,setTrainfo]=useState([]);
   const [nexinfo,setNexinfo]=useState([]);
   const colors=["#0d3692","#33a23d","#fe5d10","#00a2d1","#8b50a4","#c55c1d","#54640d","#f14c82","#aa9872"];
-  let asd='6호선';//subwayNm으로 체크할거임 
+  let asd=searchParams.get('subwayNm');//subwayNm으로 체크할거임 
   const linecolor=colors[asd.replace('호선','')-1]//subwayNm으로 체크할거임 get.replace~~
   const style = {
     color: theme.gray1,
@@ -43,36 +44,100 @@ function SubwayPage({ theme, lang }) {
     window.Kakao.Share.sendCustom({
       templateId: 85076, 
       templateArgs:{
-        title: '흑석', //trainfo.statnNm
-        state: '접근'//trainfo.trainSttus
+        title: trainfo.statnNm,
+        state: {0:'역에 진입',1:'역에 도착',2:'역에서 출발',3:'역에서 출발'}[trainfo.trainSttus],
       },
     });
   };
   const Nextreceive=()=>{// 도착 예정시간 받아오는거 
-  axiosInstance.get(`/subway/arrival?updnLine=${setTrainfo.updnLine}&subwayNm=${searchParams.get('subwayNm')}&statnNm=${setTrainfo.statnNm}`)
+  axiosInstance.get(`/subway/arrival?subwayNm=${searchParams.get('subwayNm')}&updnLine=${trainfo.updnLine}&statnNm=${trainfo.statnNm}`)
   .then((res) => {
-    setNexinfo(res.data)
-  });
+    setNexinfo(res.data.data)
+    console.log(res.data.data)
+  })
+  .catch(function (error) {
+    if (error.response) {
+      // 요청이 이루어졌으며 서버가 2xx의 범위를 벗어나는 상태 코드로 응답했습니다.
+      console.log(error.response.data);
+      console.log(error.response.status);
+      console.log(error.response.headers);
+    }
+    else if (error.request) {
+      // 요청이 이루어 졌으나 응답을 받지 못했습니다.
+      // `error.request`는 브라우저의 XMLHttpRequest 인스턴스 또는
+      // Node.js의 http.ClientRequest 인스턴스입니다.
+      console.log(error.request);
+    }
+    else {
+      // 오류를 발생시킨 요청을 설정하는 중에 문제가 발생했습니다.
+      console.log('Error', error.message);
+    }
+    console.log(error.config);
+  });;
     
 }
-  const Inforeceive=()=>{
+ 
+/*const Inforeceive=()=>{
+  console.log(searchParams.get('trainNo'));
+axiosInstance.get(`/subway?subwayNm=${searchParams.get('subwayNm')}&test=true`)
+.then((res) => {
+  setTrainfo(res.data.data)
+  console.log(trainfo)
+});
+  
+}*/
+
+const Inforeceive=()=>{
     console.log(searchParams.get('trainNo'));
-  axiosInstance.get(`/subway?trainNo=${searchParams.get('trainNo')}&subwayNm=${searchParams.get('subwayNm')}`)
+  axiosInstance.get(`/subway?subwayNm=${searchParams.get('subwayNm')}&trainNo=${searchParams.get('trainNo')}`)
   .then((res) => {
-    setTrainfo(res.data)
-  });
+    setTrainfo(res.data.data)
+    console.log(res)
     
-}//호선 정보 받는거
+  })
+  .catch(function (error) {
+    if (error.response) {
+      // 요청이 이루어졌으며 서버가 2xx의 범위를 벗어나는 상태 코드로 응답했습니다.
+      console.log(error.response.data);
+      console.log(error.response.status);
+      console.log(error.response.headers);
+      if(error.response.data.code===-1){
+        setNowtrain(false);   
+      }
+  
+    }
+    else if (error.request) {
+      // 요청이 이루어 졌으나 응답을 받지 못했습니다.
+      // `error.request`는 브라우저의 XMLHttpRequest 인스턴스 또는
+      // Node.js의 http.ClientRequest 인스턴스입니다.
+      console.log(error.request);
+    }
+    else {
+      // 오류를 발생시킨 요청을 설정하는 중에 문제가 발생했습니다.
+      console.log('Error', error.message);
+    }
+    console.log(error.config);
+  });;
+    
+}
+/*
 let timer=setInterval(()=>{  
   Inforeceive() 
   setTimeState(timeState===true?false:true)
   console.log("5ses")
 },5000);//5초마다 자동갱신 
-
+*/
 
 
   return (
+    useEffect(() => {
+      Inforeceive()
+      Nextreceive()
+    },[]),
+
     <div style={{ width: '100vw', padding: '100px 0px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+     
+
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <div style={{color:theme.gray1}}>{
           {
@@ -83,6 +148,7 @@ let timer=setInterval(()=>{
         }
         <RefreshIcon onClick={()=>{
            Inforeceive()
+           Nextreceive()
            setTimeState(timeState===true?false:true)
            console.log('click')
         }
@@ -113,20 +179,26 @@ let timer=setInterval(()=>{
               fontWeight: 600,
             }}//trainfo.statnTnm
           >
-            9호선 - 중앙보훈병원 행 
+            {searchParams.get('subwayNm')} -{trainfo?.statnTnm}행 
           </div> 
 
           <div
             style={{
               color: '#ffffff',
               backgroundColor: '#ff4444',
-              padding: '5px 10px',
+              padding: '5px 15px',
               borderRadius: '20px',
               fontSize: '15px',
               fontWeight: 600,
             }}//{trainfo.direcctAt===1?<p>급행열차</p>:<p>일반열차</p>}
-          >
-            급행열차
+          >{
+            {
+              kor:(trainfo?.directAt==1?<div>급행열차</div>:<div>일반열차</div>),
+              eng:(trainfo?.directAt==1?<div>Express</div>:<div>All Stop</div>)
+
+            }[lang]
+          }
+            
           </div>
          
         </div>
@@ -134,22 +206,83 @@ let timer=setInterval(()=>{
         <div style={{ height: '40px' }} />
 
         <div style={{ display: 'flex', alignItems: 'start', flexDirection: 'column', gap: 7 }}>
-          <div style={{ fontSize: '15px', fontWeight: '400', color: '#aaaaaa' }}>신논현역</div>
-          <div style={{ fontSize: '15px', fontWeight: '400', color: '#aaaaaa' }}>고속터미널역</div>
+          <div style={{ fontSize: '15px', fontWeight: '400', color: '#aaaaaa' }}>{
+          {
+            kor:trainfo?.prevStatns?.stationNameList[0]?.kor,
+            eng:trainfo?.prevStatns?.stationNameList[0]?.eng
+          }[lang]      
+        }
+          </div>
+          <div style={{ fontSize: '15px', fontWeight: '400', color: '#aaaaaa' }}>
+          {
+          {
+            kor:trainfo?.prevStatns?.stationNameList[1]?.kor,
+            eng:trainfo?.prevStatns?.stationNameList[1]?.eng
+          }[lang]      
+        }</div>
           <div style={{ position: 'relative', margin: '-7px 0' }}>
+            {
+              ((trainfo.subwayHeading==0)&&(trainfo.trainSttus==0||trainfo.trainSttus==1))?<div style={{ position: 'absolute', fontSize: '40px', bottom: 13, left: -60, opacity: '100%', color:theme.gray1 }}>
+              <RiArrowLeftSLine />
+            </div>:
             <div style={{ position: 'absolute', fontSize: '40px', bottom: 13, left: -60, opacity: '20%', color:theme.gray1 }}>
               <RiArrowLeftSLine />
             </div>
+            }
 
-            <div style={{ fontSize: '70px', fontWeight: '700', letterSpacing: 3,color:theme.gray1 }}>동작역</div>
-            <div style={{ position: 'absolute', fontSize: '40px', bottom: 13, right: -60 ,color:theme.gray1}}>
+            <div style={{ fontSize: '70px', fontWeight: '700', letterSpacing: 3,color:theme.gray1 ,whiteSpace:"pre-line"}}>
+            {
+              {
+                false:'운행 종료된 \n열차입니다.',
+                true:trainfo.statnNm
+
+              }[nowtrain]
+            }
+            </div>
+            {
+              ((trainfo.subwayHeading==1)&&(trainfo.trainSttus==0||trainfo.trainSttus==1))?<div style={{ position: 'absolute', fontSize: '40px', bottom: 13, opacity: '100%',right: -60 ,color:theme.gray1}}>
+              <RiArrowRightSLine />
+            </div>:<div style={{ position: 'absolute', fontSize: '40px', bottom: 13,opacity: '20%', right: -60 ,color:theme.gray1}}>
               <RiArrowRightSLine />
             </div>
-            <div style={{ position: 'absolute', fontSize: '27px', fontWeight: '600', right: 0, color:theme.gray1 }}>접근 중</div>
+            }
+            <div style={{ position: 'absolute', fontSize: '27px', fontWeight: '600', right: 0, color:theme.gray1 }}> {
+          {
+            0:{
+              eng:'approach',
+              kor:'진입'
+            }[lang],
+            1: {
+              eng:'arrival',
+              kor:'도착'
+            }[lang],
+            2:{
+              eng:'leave',
+              kor:'출발'
+            }[lang],
+            3:'출발'
+          }[trainfo?.trainSttus]        
+        }
+        </div>
           </div>
-          <div style={{ fontSize: '15px', fontWeight: '400', color: '#aaaaaa' }}>노량진역</div>
-          <div style={{ fontSize: '15px', fontWeight: '400', color: '#aaaaaa' }}>여의도역</div>
-          <div style={{ fontSize: '15px', fontWeight: '400', color: '#aaaaaa' }}>당산역</div>
+          <div style={{ fontSize: '15px', fontWeight: '400', color: '#aaaaaa' }}>{
+          {
+            kor:trainfo?.nextStatns?.stationNameList[0]?.kor,
+            eng:trainfo?.nextStatns?.stationNameList[0]?.eng
+          }[lang]      
+        }</div>
+          <div style={{ fontSize: '15px', fontWeight: '400', color: '#aaaaaa' }}>{
+          {
+            kor:trainfo?.nextStatns?.stationNameList[1]?.kor,
+            eng:trainfo?.nextStatns?.stationNameList[1]?.eng
+          }[lang]      
+        }</div>
+          <div style={{ fontSize: '15px', fontWeight: '400', color: '#aaaaaa' }}>{
+          {
+            kor:trainfo?.nextStatns?.stationNameList[2]?.kor,
+            eng:trainfo?.nextStatns?.stationNameList[2]?.eng
+          }[lang]      
+        }</div>
         </div>
         {
           {
