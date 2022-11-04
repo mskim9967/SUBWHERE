@@ -3,18 +3,18 @@ package cau.capstone.ottitor.service;
 import cau.capstone.ottitor.domain.Station;
 import cau.capstone.ottitor.dto.*;
 import cau.capstone.ottitor.repository.StationRepository;
+import cau.capstone.ottitor.util.GeneralException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+
+import static cau.capstone.ottitor.constant.Code.SUBWAY_END;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -50,7 +50,7 @@ public class SubwayService {
         assert realtimePositionDto != null;
 
         if (realtimePositionDto.getRealtimePositionList() == null) {
-            return "해당 열차는 운행이 종료되었습니다.";
+            throw new GeneralException(SUBWAY_END);
         }
 
         /*
@@ -73,7 +73,7 @@ public class SubwayService {
 
         // 실시간 위치정보에 요청한 지하철 번호가 존재하지않으면 운행 종료 표시.
         if (!find) {
-            return "해당 열차는 운행이 종료되었습니다.";
+            throw new GeneralException(SUBWAY_END);
         }
 
         /*
@@ -85,19 +85,8 @@ public class SubwayService {
         String curStation = realtimePositionResponseDto.getStatnNm();
         String endStation = realtimePositionResponseDto.getStatnTnm();
 
-        int curStationIndex = 0;
-        int endStationIndex = 0;
-
-        // 현재역과 종착역에 대한 index 설정.
-        for (int i = 0; i < stations.size(); i++) {
-            if (stations.get(i).getNmKor().equals(curStation)) {
-                curStationIndex = i;
-            }
-
-            if (stations.get(i).getNmKor().equals(endStation)) {
-                endStationIndex = i;
-            }
-        }
+        int curStationIndex = getStationIndex(stations, curStation);
+        int endStationIndex = getStationIndex(stations, endStation);
 
         String curStationFrCode = stations.get(curStationIndex).getFrCode();
         String endStationFrCode = stations.get(endStationIndex).getFrCode();
@@ -156,9 +145,9 @@ public class SubwayService {
             stations.removeIf(station -> station.getFrCode().contains("-"));
             cycle = true;
 
-            // 도착역이 "성수종착" 인경우 도착역을 바꿔줘야함.
+            // 도착역이 "성수종착" 인경우 도착역을 빈 문자열로 설정.
             if (realtimePositionResponseDto.getStatnTnm().contains("종착")) {
-                realtimePositionResponseDto.setStatnTnm("순환");
+                realtimePositionResponseDto.setStatnTnm("");
             }
 
             System.out.println("<순환>");
@@ -252,11 +241,11 @@ public class SubwayService {
 
         assert realtimeArrivalDto != null;
 
-        // 해당열차가 운행중인데도 가끔식 이 표시가 나오는데, 아마 역 도착하고나서 출발해도 null 이 나와서 그런듯. 처리 필요.
+        // 해당역에 접근중인 지하철이 없을 때. 문방향없이 반환.
         // 테스트 필요.
 
         if (realtimeArrivalDto.getRealtimeArrivalList() == null) {
-            return "해당 열차는 운행이 종료되었습니다. 236줄";
+            return realtimePositionResponseDto;
         }
 
         // 열차의 문 방향이 왼쪽이면 0, 오른쪽이면 1 저장.
@@ -453,7 +442,8 @@ public class SubwayService {
             }
         }
 
-        return -1;
+        // 2호선 순환열차일경우 endStationIndex 를 그냥 0으로 설정. (어차피 사용 x)
+        return 0;
     }
 
 
@@ -471,29 +461,6 @@ public class SubwayService {
     }
 
     /**
-     * 호선명으로 지하철역정보 가져오는 테스트
-     */
-    public SubwayInformationDto testSubwayInfo(String subwayNm) {
-        RestTemplate restTemplate = new RestTemplate();
-
-        List<Station> stations = stationRepository.findByLineNumOrderByFrCodeAsc("04호선");
-        stations.forEach(station -> System.out.println(station.getNmKor() + " " + station.getFrCode() + " " + station.getDirectAt() + " " + station.getMnt()));
-
-        // 요청 한글 인코딩(5호선)
-        restTemplate.getMessageConverters()
-                .add(0, new StringHttpMessageConverter(StandardCharsets.UTF_8));
-
-
-        return restTemplate.exchange(
-                // %20은 공백, 공백없이 슬래시 여러개를 붙이면(///) restTemplate 에서 이를 지워버림
-                "http://openapi.seoul.go.kr:8088/" + apiKey + "/json/SearchSTNBySubwayLineInfo/1/100/%20/%20/" + subwayNm,
-                HttpMethod.GET,
-                null,
-                SubwayInformationDto.class
-        ).getBody();
-    }
-
-    /**
      * 역이름으로 해당 역에 들어오는 실시간 열차정보 가져오는 테스트
      */
     public Object testSubwayArrival(String statnNm) {
@@ -504,5 +471,29 @@ public class SubwayService {
                 null,
                 RealtimeArrivalDto.class
         ).getBody();
+    }
+
+    /**
+     * 호선을 넘겨받아 해당 호선에 운행하는 열차리스트 중 가장 오래 운행할만한 열차를 뽑아 해당 열차로 실시간 정보 반환.
+     */
+    public Object testRealtimePositionTemp(String subwayNm) {
+        RealtimePositionDto realtimePositionDto = (RealtimePositionDto) testRealtimePosition(subwayNm);
+
+        List<Station> stations = stationRepository.findByLineNumOrderByFrCodeAsc(0 + subwayNm);
+        Map<RealtimePositionDto.RealtimePosition, Integer> map = new HashMap<>();
+
+        for (RealtimePositionDto.RealtimePosition realtimePosition : realtimePositionDto.getRealtimePositionList()) {
+            String curStation = realtimePosition.getSubwayNm();
+            String endStation = realtimePosition.getStatnTnm();
+
+            int curStationIndex = getStationIndex(stations, curStation);
+            int endStationIndex = getStationIndex(stations, endStation);
+
+            map.put(realtimePosition, Math.abs(endStationIndex - curStationIndex));
+        }
+
+        List<Map.Entry<RealtimePositionDto.RealtimePosition, Integer>> list = new LinkedList<>(map.entrySet());
+        list.sort(((o1, o2) -> o2.getValue() - o1.getValue()));
+        return getRealTimeSubway(subwayNm, list.get(0).getKey().getTrainNo());
     }
 }

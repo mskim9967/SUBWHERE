@@ -12,7 +12,7 @@ import org.springframework.http.HttpStatus;
 @RequiredArgsConstructor
 public enum Code {
     OK(0, HttpStatus.OK, "Ok"),
-
+    SUBWAY_END(-1, HttpStatus.BAD_REQUEST, "운행종료열차"),
     BAD_REQUEST(2000, HttpStatus.BAD_REQUEST, "Bad request"),
     VALIDATION_ERROR(2001, HttpStatus.BAD_REQUEST, "Validation error"),
     PROVIDER_TYPE_NOT_VALID(2101, HttpStatus.BAD_REQUEST, "Provider type not valid(kakao, apple)"),

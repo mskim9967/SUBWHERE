@@ -18,18 +18,19 @@ public class SubwayController {
     private final SubwayService subwayService;
 
     @GetMapping(path = "")
-    public DataResponseDto<Object> getRealtimeSubway(@RequestParam String subwayNm, @RequestParam String trainNo) {
-        return DataResponseDto.of(subwayService.getRealTimeSubway(subwayNm, trainNo));
+    public DataResponseDto<Object> getRealtimeSubway(@RequestParam String subwayNm, @RequestParam(required = false) String trainNo,
+                                                     @RequestParam String test) {
+
+        if (test.equals("true")) {
+            return DataResponseDto.of(subwayService.testRealtimePositionTemp(subwayNm));
+        } else {
+            return DataResponseDto.of(subwayService.getRealTimeSubway(subwayNm, trainNo));
+        }
     }
 
     @GetMapping(path = "/realtime")
     public DataResponseDto<Object> getRealTimeSubwayTotal(@RequestParam String subwayNm) {
         return DataResponseDto.of(subwayService.testRealtimePosition(subwayNm));
-    }
-
-    @GetMapping(path = "/info")
-    public DataResponseDto<Object> getSubwayInformation(@RequestParam String subwayNm) {
-        return DataResponseDto.of(subwayService.testSubwayInfo(subwayNm));
     }
 
     @GetMapping(path = "/arrival")
