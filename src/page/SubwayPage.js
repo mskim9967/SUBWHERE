@@ -1,14 +1,16 @@
 import { RiArrowRightSLine, RiArrowLeftSLine, RiAlarmWarningFill, RiKakaoTalkFill, RiTimeFill } from 'react-icons/ri';
-import { useEffect, useState } from 'react';
+import { useEffect, useState,useRef } from 'react';
 import {  useSearchParams } from 'react-router-dom';
 import { axiosInstance } from '../axiosInstance';
 import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import RefreshIcon from '@mui/icons-material/Refresh';
+import AcUnitIcon from '@mui/icons-material/AcUnit';
+import CleaningServicesIcon from '@mui/icons-material/CleaningServices';
 import React from "react";
+import AirIcon from '@mui/icons-material/Air';
 import { ToastNotification } from '../ToastNotification';
-
 
 
 
@@ -16,9 +18,10 @@ import { ToastNotification } from '../ToastNotification';
 function SubwayPage({ theme, lang }) {
   
   const [nowtrain, setNowtrain] = useState(true);
+  const [report, setReport] = useState(false);
 
   let [toastState, setToastState] = useState(false);
-  let [timeState, setTimeState] = useState(true);
+  let [timeState, setTimeState] = useState(5);
   const [searchParams, setSearchParams] = useSearchParams();
   const [modalOpen, setModalOpen] = useState(false);
   const [trainfo,setTrainfo]=useState([]);
@@ -77,27 +80,16 @@ function SubwayPage({ theme, lang }) {
     
 }
  
-/*const Inforeceive=()=>{
-  console.log(searchParams.get('trainNo'));
-axiosInstance.get(`/subway?subwayNm=${searchParams.get('subwayNm')}&test=true`)
-.then((res) => {
-  setTrainfo(res.data.data)
-  console.log(trainfo)
-});
-  
-}*/
 
 const Inforeceive=()=>{
-    console.log(searchParams.get('trainNo'));
   axiosInstance.get(`/subway?subwayNm=${searchParams.get('subwayNm')}&trainNo=${searchParams.get('trainNo')}`)
   .then((res) => {
     setTrainfo(res.data.data)
-    console.log(res)
+  
     
   })
   .catch(function (error) {
     if (error.response) {
-      // 요청이 이루어졌으며 서버가 2xx의 범위를 벗어나는 상태 코드로 응답했습니다.
       console.log(error.response.data);
       console.log(error.response.status);
       console.log(error.response.headers);
@@ -107,36 +99,47 @@ const Inforeceive=()=>{
   
     }
     else if (error.request) {
-      // 요청이 이루어 졌으나 응답을 받지 못했습니다.
-      // `error.request`는 브라우저의 XMLHttpRequest 인스턴스 또는
-      // Node.js의 http.ClientRequest 인스턴스입니다.
       console.log(error.request);
     }
     else {
-      // 오류를 발생시킨 요청을 설정하는 중에 문제가 발생했습니다.
       console.log('Error', error.message);
     }
     console.log(error.config);
   });;
     
 }
-/*
-let timer=setInterval(()=>{  
-  Inforeceive() 
-  setTimeState(timeState===true?false:true)
-  console.log("5ses")
-},5000);//5초마다 자동갱신 
-*/
+const fontRef = useRef(5);
+useEffect(() => {
+  setInterval(() => {
+    Inforeceive() 
+  }, 5000);
+}, []);//5초마다 새로고침하는거
+let nowst='d';
 
+const notifi=()=>{
+  if(trainfo.trainSttus==0){
+    if(toastState==0){
+      if(nowst!=trainfo.statnNm){
+        nowst=trainfo.statnNm;
+        setToastState(true);
+      
+      }
+    }
+  }
+
+}
 
   return (
     useEffect(() => {
       Inforeceive()
-      Nextreceive()
     },[]),
+    useEffect(() => {
+      notifi()
+    },[trainfo.trainSttus]),
 
-    <div style={{ width: '100vw', padding: '100px 0px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-     
+    <div style={{ position:'fixed',width: '100vw', padding: '100px 0px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+    
+      
 
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <div style={{color:theme.gray1}}>{
@@ -148,8 +151,7 @@ let timer=setInterval(()=>{
         }
         <RefreshIcon onClick={()=>{
            Inforeceive()
-           Nextreceive()
-           setTimeState(timeState===true?false:true)
+           setTimeState((fontRef.current += 1));
            console.log('click')
         }
          
@@ -205,7 +207,7 @@ let timer=setInterval(()=>{
 
         <div style={{ height: '40px' }} />
 
-        <div style={{ display: 'flex', alignItems: 'start', flexDirection: 'column', gap: 7 }}>
+        <div style={{display: 'flex', alignItems: 'center', flexDirection: 'column', gap: 14 }}>
           <div style={{ fontSize: '15px', fontWeight: '400', color: '#aaaaaa' }}>{
           {
             kor:trainfo?.prevStatns?.stationNameList[0]?.kor,
@@ -222,10 +224,16 @@ let timer=setInterval(()=>{
         }</div>
           <div style={{ position: 'relative', margin: '-7px 0' }}>
             {
-              ((trainfo.subwayHeading==0)&&(trainfo.trainSttus==0||trainfo.trainSttus==1))?<div style={{ position: 'absolute', fontSize: '40px', bottom: 13, left: -60, opacity: '100%', color:theme.gray1 }}>
+              ((trainfo.subwayHeading==0)&&(trainfo.trainSttus==0||trainfo.trainSttus==1))?trainfo?.statnNm?.length>5?
+              <div style={{ position: 'absolute', fontSize: '40px', bottom: 'center', left: -40, opacity: '100%', color:theme.gray1 }}>
               <RiArrowLeftSLine />
-            </div>:
-            <div style={{ position: 'absolute', fontSize: '40px', bottom: 13, left: -60, opacity: '20%', color:theme.gray1 }}>
+            </div>:<div style={{ position: 'absolute', fontSize: '40px', bottom: 13, left: -40, opacity: '100%', color:theme.gray1 }}>
+              <RiArrowLeftSLine />
+            </div>
+            :trainfo?.statnNm?.length>5?
+            <div style={{ position: 'absolute', fontSize: '40px', top: 'center', left: -40, opacity: '20%', color:theme.gray1 }}>
+              <RiArrowLeftSLine />
+            </div>:<div style={{ position: 'absolute', fontSize: '40px', top: 13, left: -40, opacity: '20%', color:theme.gray1 }}>
               <RiArrowLeftSLine />
             </div>
             }
@@ -234,17 +242,26 @@ let timer=setInterval(()=>{
             {
               {
                 false:'운행 종료된 \n열차입니다.',
-                true:trainfo.statnNm
+                true:(trainfo?.statnNm?.length>5?<div style={{ fontSize: '30px', fontWeight: '700', letterSpacing: 3,color:theme.gray1 ,whiteSpace:"pre-line"}}>{trainfo.statnNm}</div>:
+                <div style={{ fontSize: '60px', fontWeight: '700', letterSpacing: 3,color:theme.gray1 ,whiteSpace:"pre-line"}}>{trainfo.statnNm}</div>)
 
               }[nowtrain]
             }
             </div>
             {
-              ((trainfo.subwayHeading==1)&&(trainfo.trainSttus==0||trainfo.trainSttus==1))?<div style={{ position: 'absolute', fontSize: '40px', bottom: 13, opacity: '100%',right: -60 ,color:theme.gray1}}>
+              ((trainfo.subwayHeading==1)&&(trainfo.trainSttus==0||trainfo.trainSttus==1))?trainfo?.statnNm?.length>5?
+              <div style={{ position: 'absolute', fontSize: '40px', top: '1vw', opacity: '100%',right: -40 ,color:theme.gray1}}>
               <RiArrowRightSLine />
-            </div>:<div style={{ position: 'absolute', fontSize: '40px', bottom: 13,opacity: '20%', right: -60 ,color:theme.gray1}}>
+            </div>:<div style={{ position: 'absolute', fontSize: '40px', bottom: 13, opacity: '100%',right: -40 ,color:theme.gray1}}>
               <RiArrowRightSLine />
             </div>
+            :trainfo?.statnNm?.length>5?
+            <div style={{ position: 'absolute', fontSize: '40px', top: '1vw',opacity: '20%', right: -40 ,color:theme.gray1}}>
+              <RiArrowRightSLine />
+            </div>
+            :<div style={{ position: 'absolute', fontSize: '40px', bottom: 13,opacity: '20%', right: -40 ,color:theme.gray1}}>
+            <RiArrowRightSLine />
+          </div>
             }
             <div style={{ position: 'absolute', fontSize: '27px', fontWeight: '600', right: 0, color:theme.gray1 }}> {
           {
@@ -265,6 +282,8 @@ let timer=setInterval(()=>{
         }
         </div>
           </div>
+          <div></div>
+          <div></div>
           <div style={{ fontSize: '15px', fontWeight: '400', color: '#aaaaaa' }}>{
           {
             kor:trainfo?.nextStatns?.stationNameList[0]?.kor,
@@ -286,10 +305,11 @@ let timer=setInterval(()=>{
         </div>
         {
           {
-            true: <ToastNotification setToastState={setToastState}></ToastNotification>,
-            false: '',
-          }[toastState]        //접근중으로 바뀌면 알림 지금은 테스트해보려고 신고문의 누르면 뜨게해둠
+            true: <ToastNotification setToastState={setToastState} train={trainfo.statnNm}></ToastNotification>,
+            false: console.log(toastState),
+          }[toastState]        
         }
+        
       </div>
       <div style={{ height: '80px' }} />
       <div
@@ -317,7 +337,10 @@ let timer=setInterval(()=>{
             padding: '10px',
           }}
         >
-          <RiAlarmWarningFill onClick={()=>{setToastState(true)}} style={{ color: 'FFB833', fontSize: '20px' }} />
+          <RiAlarmWarningFill onClick={() => {
+            setReport(true);
+          }} style={{ color: 'FFB833', fontSize: '20px' }} />
+          
           {{
             kor:'신고',
             eng:'report'
@@ -401,6 +424,96 @@ let timer=setInterval(()=>{
           </Typography>
         </Box>
       </Modal>
+
+
+
+      <Modal open={report} onClose={() => setReport(false)}>
+        <Box sx={style}>
+          <Typography id='modal-modal-title' variant='h6' component='h2'>
+            {{
+              kor:'민원 신고',
+              eng:'report',
+            }[lang]
+            }
+          </Typography>
+          <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          height: '60px',
+          fontSize: '13px',
+          fontWeight: 700,
+          color: theme.gray1,
+          backgroundColor: theme.bacco,
+          padding: '20px 0',
+          borderRadius: '20px',
+          
+        }}
+      >
+        <div
+          style={{
+            width: '90px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 5,
+            borderRight: 'solid white 1px',
+            padding: '10px',
+          }}
+        ><a  href="sms:15771234&body="class="sms" style={{position:'relative', color:theme.gray1}}>
+          <AcUnitIcon  style={{ color:'#00F5FF	', fontSize: '20px' }} />
+          
+         
+          </a>
+          {{
+            kor:'추워요',
+            eng:'it\'s cold'
+          }[lang]}
+        </div>
+        <div
+          style={{
+            width: '90px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 5,
+            borderRight: 'solid white 1px',
+            padding: '10px',
+          }}
+        
+        >
+          <a  href="sms:15771234&body=보낼메세지"class="sms" style={{position:'relative', color:theme.gray1}}>
+          <AirIcon  style={{ color: '	#1E82FF', fontSize: '20px' }} />
+          </a>
+          {
+            {
+              kor:'더워요',
+              eng:'it\'s hot',
+            }[lang]
+          }
+          
+        </div>
+        <div
+          style={{ width: '90px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, padding: '10px' }}
+        
+        >
+          
+          <a  href="sms:15771234&body=보낼메세지"class="sms" style={{position:'relative', color:theme.gray1}}>
+          <CleaningServicesIcon style={{ color: '92FF6B', fontSize: '20px' }} />
+          </a>
+          {
+            {
+              kor:'칸이더러워요',
+              eng:'train is dirty',
+            }[lang]
+          }
+        </div>
+      </div>
+          
+          
+        </Box>
+      </Modal>
+      
     </div>
   );
 }

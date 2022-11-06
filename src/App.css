@@ -1,8 +1,17 @@
 .App {
   text-align: center;
 }
+a {
+  text-decoration: none;
+}
 
-
+.sms{
+  display: block;
+  text-align: center;
+  width: 100%;
+    
+     
+}
 .toast-alert {
   background-color: rgba(255, 127, 80, 0.4);
   border: 1px solid rgba(255, 127, 80, 0.1);
