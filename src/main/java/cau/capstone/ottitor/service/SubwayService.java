@@ -30,6 +30,9 @@ public class SubwayService {
 
         RealtimePositionResponseDto realtimePositionResponseDto = new RealtimePositionResponseDto();
 
+        // 해당 호선의 지하철역 리스트를 데이터베이스에서 가져옴.
+        List<Station> stations = stationRepository.findByLineNumOrderByFrCodeAsc(0 + subwayNm);
+
         /*
           해당 호선의 모든 지하철 정보를 가져옴.
          */
@@ -60,13 +63,31 @@ public class SubwayService {
 
         boolean find = false;
 
+        // 역 이름에 () 가 들어가는 경우 해당 부분을 삭제처리.
         for (RealtimePositionDto.RealtimePosition dto : realtimePositionDto.getRealtimePositionList()) {
             if (dto.getTrainNo().equals(trainNo)) {
                 find = true;
-                realtimePositionResponseDto.setStatnNm(dto.getStatnNm());
+
+                for (Station station : stations) {
+                    if (dto.getStatnNm().contains(station.getNmKor())) {
+                        realtimePositionResponseDto.setStatnNm(new StationNameDto.StationName(
+                                station.getNmKor(), station.getNmEng()
+                        ));
+                    }
+
+                    // 종착역이 "성수종착" 인 경우 빈 문자열로 설정.
+                    if (dto.getStatnTnm().contains(station.getNmKor())) {
+                        if(dto.getStatnTnm().contains("종착"))
+                                realtimePositionResponseDto.setStatnTnm(new StationNameDto.StationName(
+                                        "", ""));
+                        else
+                                realtimePositionResponseDto.setStatnTnm(new StationNameDto.StationName(
+                                station.getNmKor(), station.getNmEng()));
+                    }
+                }
+
                 realtimePositionResponseDto.setTrainSttus(Integer.parseInt(dto.getTrainSttus()));
                 realtimePositionResponseDto.setDirectAt(Integer.parseInt(dto.getDirectAt()));
-                realtimePositionResponseDto.setStatnTnm(dto.getStatnTnm());
                 realtimePositionResponseDto.setUpdnLine(Integer.parseInt(dto.getUpdnLine()));
             }
         }
@@ -80,10 +101,8 @@ public class SubwayService {
           해당 호선에 해당하는 역 정보들을 가져와 현재 사용자의 역을 기준으로 앞뒤에 있는 역의 리스트를 가져온다.
          */
 
-        List<Station> stations = stationRepository.findByLineNumOrderByFrCodeAsc(0 + subwayNm);
-
-        String curStation = realtimePositionResponseDto.getStatnNm();
-        String endStation = realtimePositionResponseDto.getStatnTnm();
+        String curStation = realtimePositionResponseDto.getStatnNm().getKor();
+        String endStation = realtimePositionResponseDto.getStatnTnm().getKor();
 
         int curStationIndex = getStationIndex(stations, curStation);
         int endStationIndex = getStationIndex(stations, endStation);
@@ -94,9 +113,9 @@ public class SubwayService {
         boolean cycle = false;
         boolean reverse = false;
 
-        // 급행열차이면 급행이 정차하는 역이 아닌 역들을 삭제.
+        // 급행열차이면 급행이 정차하는 역이 아닌 역들을 삭제. 열차의 현재역이 급행 정차역이 아닌 경우가 있을 수 있음. 따라서 현재 역은 남기고 삭제.
         if (realtimePositionResponseDto.getDirectAt() == 1) {
-            stations.removeIf(station -> station.getDirectAt() == 0);
+            stations.removeIf(station -> station.getDirectAt() == 0 && !station.getNmKor().equals(curStation));
 
             System.out.println("<급행>");
         }
@@ -145,24 +164,25 @@ public class SubwayService {
             stations.removeIf(station -> station.getFrCode().contains("-"));
             cycle = true;
 
-            // 도착역이 "성수종착" 인경우 도착역을 빈 문자열로 설정.
-            if (realtimePositionResponseDto.getStatnTnm().contains("종착")) {
-                realtimePositionResponseDto.setStatnTnm("");
-            }
-
             System.out.println("<순환>");
         }
 
         // 출발역 또는 도착역이 신정지선 또는 성수지선일 경우 "지선"을 삭제.
-        if (realtimePositionResponseDto.getStatnNm().contains("지선")) {
+        if (realtimePositionResponseDto.getStatnNm().getKor().contains("지선")) {
             realtimePositionResponseDto.setStatnNm(
-                    realtimePositionResponseDto.getStatnNm().replace("지선", "")
+                    new StationNameDto.StationName(
+                            realtimePositionResponseDto.getStatnNm().getKor().replace("지선", ""),
+                            realtimePositionResponseDto.getStatnNm().getEng()
+                    )
             );
         }
 
-        if (realtimePositionResponseDto.getStatnTnm().contains("지선")) {
+        if (realtimePositionResponseDto.getStatnTnm().getKor().contains("지선")) {
             realtimePositionResponseDto.setStatnTnm(
-                    realtimePositionResponseDto.getStatnTnm().replace("지선", "")
+                    new StationNameDto.StationName(
+                            realtimePositionResponseDto.getStatnTnm().getKor().replace("지선", ""),
+                            realtimePositionResponseDto.getStatnTnm().getEng()
+                    )
             );
         }
 
@@ -183,6 +203,7 @@ public class SubwayService {
             System.out.println("<P 포함>");
         }
 
+        // test 출력.
         for (Station station : stations) {
             System.out.println(station.getNmKor());
         }
@@ -190,12 +211,12 @@ public class SubwayService {
         if (cycle) {
             // 내선
             if (realtimePositionResponseDto.getUpdnLine() == 0) {
-                innerCycleLine(realtimePositionResponseDto, stations, realtimePositionResponseDto.getStatnNm());
+                innerCycleLine(realtimePositionResponseDto, stations, realtimePositionResponseDto.getStatnNm().getKor());
             }
 
             // 외선
             else {
-                outerCycleLine(realtimePositionResponseDto, stations, realtimePositionResponseDto.getStatnNm());
+                outerCycleLine(realtimePositionResponseDto, stations, realtimePositionResponseDto.getStatnNm().getKor());
             }
         }
 
@@ -204,13 +225,13 @@ public class SubwayService {
 
             // 상행일때 하행처럼 작동.
             if (realtimePositionResponseDto.getUpdnLine() == 0)
-                topToBottom(realtimePositionResponseDto, stations, realtimePositionResponseDto.getStatnNm(),
-                        realtimePositionResponseDto.getStatnTnm());
+                topToBottom(realtimePositionResponseDto, stations, realtimePositionResponseDto.getStatnNm().getKor(),
+                        realtimePositionResponseDto.getStatnTnm().getKor());
 
             // 하행일때 상행처럼 작동.
             else
-                bottomToTop(realtimePositionResponseDto, stations, realtimePositionResponseDto.getStatnNm(),
-                        realtimePositionResponseDto.getStatnTnm());
+                bottomToTop(realtimePositionResponseDto, stations, realtimePositionResponseDto.getStatnNm().getKor(),
+                        realtimePositionResponseDto.getStatnTnm().getKor());
 
         }
 
@@ -218,13 +239,13 @@ public class SubwayService {
 
             // 하행
             if (realtimePositionResponseDto.getUpdnLine() == 1)
-                topToBottom(realtimePositionResponseDto, stations, realtimePositionResponseDto.getStatnNm(),
-                        realtimePositionResponseDto.getStatnTnm());
+                topToBottom(realtimePositionResponseDto, stations, realtimePositionResponseDto.getStatnNm().getKor(),
+                        realtimePositionResponseDto.getStatnTnm().getKor());
 
             // 상행
             else
-                bottomToTop(realtimePositionResponseDto, stations, realtimePositionResponseDto.getStatnNm(),
-                        realtimePositionResponseDto.getStatnTnm());
+                bottomToTop(realtimePositionResponseDto, stations, realtimePositionResponseDto.getStatnNm().getKor(),
+                        realtimePositionResponseDto.getStatnTnm().getKor());
 
         }
 

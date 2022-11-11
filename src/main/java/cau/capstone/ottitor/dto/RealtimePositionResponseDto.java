@@ -9,9 +9,9 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class RealtimePositionResponseDto {
 
-    private String statnNm;
+    private StationNameDto.StationName statnNm;
     private Integer trainSttus;
-    private String statnTnm;
+    private StationNameDto.StationName statnTnm;
     private Integer directAt;
     private Integer updnLine;
     private StationNameDto prevStatns;

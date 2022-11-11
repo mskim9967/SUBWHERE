@@ -2,7 +2,6 @@ package cau.capstone.ottitor.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
