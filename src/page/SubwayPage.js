@@ -16,6 +16,7 @@ import { ToastNotification } from '../ToastNotification';
 
 
 function SubwayPage({ theme, lang }) {
+ 
   
   const [nowtrain, setNowtrain] = useState(true);
   const [report, setReport] = useState(false);
@@ -47,8 +48,9 @@ function SubwayPage({ theme, lang }) {
     window.Kakao.Share.sendCustom({
       templateId: 85076, 
       templateArgs:{
-        title: trainfo.statnNm,
-        state: {0:'역에 진입',1:'역에 도착',2:'역에서 출발',3:'역에서 출발'}[trainfo.trainSttus],
+        title: {kor:trainfo.statnNm.kor,eng:trainfo.statnNm.eng}[lang],
+        state: {kor:{0:'역에 진입',1:'역에 도착',2:'역에서 출발',3:'역에서 출발'}[trainfo.trainSttus],eng:
+        {0:'approach',1:'arrival',2:'leave',3:'leave'}[trainfo.trainSttus]}[lang],
       },
     });
   };
@@ -85,6 +87,7 @@ const Inforeceive=()=>{
   axiosInstance.get(`/subway?subwayNm=${searchParams.get('subwayNm')}&trainNo=${searchParams.get('trainNo')}`)
   .then((res) => {
     setTrainfo(res.data.data)
+    console.log(res.data.data)
   
     
   })
@@ -103,8 +106,10 @@ const Inforeceive=()=>{
     }
     else {
       console.log('Error', error.message);
+      
     }
     console.log(error.config);
+    
   });;
     
 }
@@ -181,7 +186,8 @@ const notifi=()=>{
               fontWeight: 600,
             }}//trainfo.statnTnm
           >
-            {searchParams.get('subwayNm')} -{trainfo?.statnTnm}행 
+          {{kor:searchParams.get('subwayNm'),eng:searchParams.get('subwayNm').replace('호선','line')}[lang]} -{{kor:trainfo?.statnTnm?.kor+'행',
+            eng:trainfo?.statnTnm?.eng}[lang]} 
           </div> 
 
           <div
@@ -242,26 +248,42 @@ const notifi=()=>{
             {
               {
                 false:'운행 종료된 \n열차입니다.',
-                true:(trainfo?.statnNm?.length>5?<div style={{ fontSize: '30px', fontWeight: '700', letterSpacing: 3,color:theme.gray1 ,whiteSpace:"pre-line"}}>{trainfo.statnNm}</div>:
-                <div style={{ fontSize: '60px', fontWeight: '700', letterSpacing: 3,color:theme.gray1 ,whiteSpace:"pre-line"}}>{trainfo.statnNm}</div>)
+                true:{kor:(trainfo?.statnNm?.kor.length>5?<div style={{ fontSize: '30px', fontWeight: '700', letterSpacing: 3,color:theme.gray1 ,whiteSpace:"pre-line"}}>{trainfo?.statnNm?.kor}</div>:
+                <div style={{ fontSize: '60px', fontWeight: '700', letterSpacing: 3,color:theme.gray1 ,whiteSpace:"pre-line"}}>{trainfo?.statnNm?.kor}</div>),
+              eng:(trainfo?.statnNm?.eng.length>8?trainfo?.statnNm?.eng.length>13?<div style={{ fontSize: '15px', fontWeight: '700', letterSpacing: 3,color:theme.gray1 ,whiteSpace:"pre-line"}}>{trainfo?.statnNm?.eng}</div>:<div style={{ fontSize: '30px', fontWeight: '700', letterSpacing: 3,color:theme.gray1 ,whiteSpace:"pre-line"}}>{trainfo?.statnNm?.eng}</div>:
+              <div style={{ fontSize: '60px', fontWeight: '700', letterSpacing: 3,color:theme.gray1 ,whiteSpace:"pre-line"}}>{trainfo?.statnNm?.eng}</div>)}[lang]
 
               }[nowtrain]
             }
             </div>
-            {
-              ((trainfo.subwayHeading==1)&&(trainfo.trainSttus==0||trainfo.trainSttus==1))?trainfo?.statnNm?.length>5?
+            {{kor:
+              ((trainfo.subwayHeading==1)&&(trainfo.trainSttus==0||trainfo.trainSttus==1))?trainfo?.statnNm?.kor.length>5?
               <div style={{ position: 'absolute', fontSize: '40px', top: '1vw', opacity: '100%',right: -40 ,color:theme.gray1}}>
               <RiArrowRightSLine />
             </div>:<div style={{ position: 'absolute', fontSize: '40px', bottom: 13, opacity: '100%',right: -40 ,color:theme.gray1}}>
               <RiArrowRightSLine />
             </div>
-            :trainfo?.statnNm?.length>5?
+            :trainfo?.statnNm?.kor.length>5?
             <div style={{ position: 'absolute', fontSize: '40px', top: '1vw',opacity: '20%', right: -40 ,color:theme.gray1}}>
               <RiArrowRightSLine />
             </div>
             :<div style={{ position: 'absolute', fontSize: '40px', bottom: 13,opacity: '20%', right: -40 ,color:theme.gray1}}>
             <RiArrowRightSLine />
-          </div>
+          </div>,
+          eng:((trainfo.subwayHeading==1)&&(trainfo.trainSttus==0||trainfo.trainSttus==1))?trainfo?.statnNm?.eng.length>5?
+          <div style={{ position: 'absolute', fontSize: '40px', top: '1vw', opacity: '100%',right: -40 ,color:theme.gray1}}>
+          <RiArrowRightSLine />
+        </div>:<div style={{ position: 'absolute', fontSize: '40px', bottom: 13, opacity: '100%',right: -40 ,color:theme.gray1}}>
+          <RiArrowRightSLine />
+        </div>
+        :trainfo?.statnNm?.eng.length>5?
+        <div style={{ position: 'absolute', fontSize: '40px', top: '3vw',opacity: '20%', right: -40 ,color:theme.gray1}}>
+          <RiArrowRightSLine />
+        </div>
+        :<div style={{ position: 'absolute', fontSize: '40px', top: 14,opacity: '20%', right: -40 ,color:theme.gray1}}>
+        <RiArrowRightSLine />
+      </div>
+        }[lang]
             }
             <div style={{ position: 'absolute', fontSize: '27px', fontWeight: '600', right: 0, color:theme.gray1 }}> {
           {
@@ -305,7 +327,8 @@ const notifi=()=>{
         </div>
         {
           {
-            true: <ToastNotification setToastState={setToastState} train={trainfo.statnNm}></ToastNotification>,
+            true: <ToastNotification setToastState={setToastState} lang={lang} train={{kor:trainfo?.statnNm?.kor,
+            eng:trainfo?.statnNm?.eng}[lang]}></ToastNotification>,
             false: console.log(toastState),
           }[toastState]        
         }

@@ -14,7 +14,7 @@ function ToastNotification(props) {
 
     return (
         <div className="toast-alert">
-            <p>{props.train}역 접근</p>
+            <p>{{kor:props.train+'역 접근',eng:props.train+'approach' }[props.lang]}</p>
         </div>
     );
 }
