@@ -8,9 +8,12 @@ import Typography from '@mui/material/Typography';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import AcUnitIcon from '@mui/icons-material/AcUnit';
 import CleaningServicesIcon from '@mui/icons-material/CleaningServices';
+import MasksIcon from '@mui/icons-material/Masks';
 import React from "react";
 import AirIcon from '@mui/icons-material/Air';
 import { ToastNotification } from '../ToastNotification';
+import ReportIcon from '@mui/icons-material/Report';
+import ProductionQuantityLimitsIcon from '@mui/icons-material/ProductionQuantityLimits';
 
 
 
@@ -48,9 +51,9 @@ function SubwayPage({ theme, lang }) {
     window.Kakao.Share.sendCustom({
       templateId: 85076, 
       templateArgs:{
-        title: {kor:trainfo.statnNm.kor,eng:trainfo.statnNm.eng}[lang],
-        state: {kor:{0:'역에 진입',1:'역에 도착',2:'역에서 출발',3:'역에서 출발'}[trainfo.trainSttus],eng:
-        {0:'approach',1:'arrival',2:'leave',3:'leave'}[trainfo.trainSttus]}[lang],
+        title: {kor:'현재 '+trainfo.statnNm.kor,eng:trainfo.statnNm.eng}[lang],
+        state: {kor:{0:'역에 진입 하였습니다',1:'역에 도착하였습니다',2:'역에서 출발하였습니다',3:'역에서 출발하였습니다'}[trainfo.trainSttus],eng:
+        {0:' approach',1:' arrival',2:' leave',3:' leave'}[trainfo.trainSttus]}[lang],
       },
     });
   };
@@ -208,6 +211,9 @@ const notifi=()=>{
           }
             
           </div>
+          <div style={{ color: '#ffffff', backgroundColor: '#777777', padding: '5px 10px', borderRadius: '20px', fontSize: '15px', fontWeight: 600 }}>
+            {{kor:searchParams.get('carNo')+"칸",eng:searchParams.get('carNo')+"space"}[lang]}
+          </div>
          
         </div>
 
@@ -299,26 +305,29 @@ const notifi=()=>{
               eng:'leave',
               kor:'출발'
             }[lang],
-            3:'출발'
+            3:{
+              eng:'leave',
+              kor:'출발'
+            }[lang]
           }[trainfo?.trainSttus]        
         }
         </div>
           </div>
           <div></div>
           <div></div>
-          <div style={{ fontSize: '15px', fontWeight: '400', color: '#aaaaaa' }}>{
+          <div style={{ fontSize: '15px', fontWeight: '700', color: theme.gray1 }}>{
           {
             kor:trainfo?.nextStatns?.stationNameList[0]?.kor,
             eng:trainfo?.nextStatns?.stationNameList[0]?.eng
           }[lang]      
         }</div>
-          <div style={{ fontSize: '15px', fontWeight: '400', color: '#aaaaaa' }}>{
+          <div style={{ fontSize: '15px', fontWeight: '700', color: theme.gray1 }}>{
           {
             kor:trainfo?.nextStatns?.stationNameList[1]?.kor,
             eng:trainfo?.nextStatns?.stationNameList[1]?.eng
           }[lang]      
         }</div>
-          <div style={{ fontSize: '15px', fontWeight: '400', color: '#aaaaaa' }}>{
+          <div style={{ fontSize: '15px', fontWeight: '700', color: theme.gray1 }}>{
           {
             kor:trainfo?.nextStatns?.stationNameList[2]?.kor,
             eng:trainfo?.nextStatns?.stationNameList[2]?.eng
@@ -483,7 +492,11 @@ const notifi=()=>{
             borderRight: 'solid white 1px',
             padding: '10px',
           }}
-        ><a  href="sms:15771234&body="class="sms" style={{position:'relative', color:theme.gray1}}>
+        ><a  href="sms:15771234<?php echo (preg_match('/iPhone/', $_SERVER['HTTP_USER_AGENT'])) ? '&' : '?'; ?>body= <%=searchParams.get('carNo')%>칸 추워요 온도 높여주세요"class="sms" style={{position:'relative', color:theme.gray1}}>
+        
+
+          
+          
           <AcUnitIcon  style={{ color:'#00F5FF	', fontSize: '20px' }} />
           
          
@@ -505,7 +518,7 @@ const notifi=()=>{
           }}
         
         >
-          <a  href="sms:15771234&body=보낼메세지"class="sms" style={{position:'relative', color:theme.gray1}}>
+          <a  href="sms:15771234<?php echo (preg_match('/iPhone/', $_SERVER['HTTP_USER_AGENT'])) ? '&' : '?'; ?>body= <%=searchParams.get('carNo')%>칸 더워요 온도 내려주세요"class="sms" style={{position:'relative', color:theme.gray1}}>
           <AirIcon  style={{ color: '	#1E82FF', fontSize: '20px' }} />
           </a>
           {
@@ -521,13 +534,86 @@ const notifi=()=>{
         
         >
           
-          <a  href="sms:15771234&body=보낼메세지"class="sms" style={{position:'relative', color:theme.gray1}}>
+          <a  href="sms:15771234<?php echo (preg_match('/iPhone/', $_SERVER['HTTP_USER_AGENT'])) ? '&' : '?'; ?>body= <%=searchParams.get('carNo')%>칸이 더러워요"class="sms" style={{position:'relative', color:theme.gray1}}>
           <CleaningServicesIcon style={{ color: '92FF6B', fontSize: '20px' }} />
           </a>
           {
             {
               kor:'칸이더러워요',
               eng:'train is dirty',
+            }[lang]
+          }
+        </div>
+      </div>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          height: '60px',
+          fontSize: '13px',
+          fontWeight: 700,
+          color: theme.gray1,
+          backgroundColor: theme.bacco,
+          padding: '20px 0',
+          borderRadius: '20px',
+          
+        }}
+      >
+        <div
+          style={{
+            width: '90px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 5,
+            borderRight: 'solid white 1px',
+            padding: '10px',
+          }}
+        ><a  href="sms:15771234<?php echo (preg_match('/iPhone/', $_SERVER['HTTP_USER_AGENT'])) ? '&' : '?'; ?>body= <%=searchParams.get('carNo')%>칸 마스크 안쓴사람 있어요"class="sms" style={{position:'relative', color:theme.gray1}}>
+        
+          <MasksIcon  style={{ color:'#000000	', fontSize: '20px' }} />
+          
+          </a>
+          {{
+            kor:'노 마스크',
+            eng:'No mask'
+          }[lang]}
+        </div>
+        <div
+          style={{
+            width: '90px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 5,
+            borderRight: 'solid white 1px',
+            padding: '10px',
+          }}
+        
+        >
+          <a  href="sms:15771234<?php echo (preg_match('/iPhone/', $_SERVER['HTTP_USER_AGENT'])) ? '&' : '?'; ?>body= <%=searchParams.get('carNo')%>칸 잡상인 있어요"class="sms" style={{position:'relative', color:theme.gray1}}>
+          <ProductionQuantityLimitsIcon  style={{ color: '#000000', fontSize: '20px' }} />
+          </a>
+          {
+            {
+              kor:'잡상인신고',
+              eng:'hawker',
+            }[lang]
+          }
+          
+        </div>
+        <div
+          style={{ width: '90px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, padding: '10px' }}
+        
+        >
+          
+          <a  href="sms:15771234<?php echo (preg_match('/iPhone/', $_SERVER['HTTP_USER_AGENT'])) ? '&' : '?'; ?>body= <%=searchParams.get('carNo')%>칸"class="sms" style={{position:'relative', color:theme.gray1}}>
+          <ReportIcon style={{ color: '#EB0000', fontSize: '20px' }} />
+          </a>
+          {
+            {
+              kor:'기타 신고',
+              eng:'Other report',
             }[lang]
           }
         </div>
