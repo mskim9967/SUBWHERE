@@ -14,12 +14,39 @@ import AirIcon from '@mui/icons-material/Air';
 import { ToastNotification } from '../ToastNotification';
 import ReportIcon from '@mui/icons-material/Report';
 import ProductionQuantityLimitsIcon from '@mui/icons-material/ProductionQuantityLimits';
+import { DownloadDone } from '@mui/icons-material';
 
 
 
 
 function SubwayPage({ theme, lang }) {
+  var smstext='';
+
+
+function sendSMS(smstext) {
+  let whatphone=0;
+  var IorA = navigator.userAgent.toLowerCase();
+  if(IorA.indexOf("android") !== -1){
+    whatphone=0;
+}else if(IorA.indexOf("iphone") !== -1){
+  whatphone=1;
+}
+
+var text = searchParams.get('subwayNm')+searchParams.get('carNo')+'칸'+smstext
+if (whatphone==0){
+  window.location.href='sms:15771234?body=' + text;
+
+}else{
+  
+  window.location.href='sms:15771234&body=' + text;
+}
+	
+}
+
+        
+
  
+  
   
   const [nowtrain, setNowtrain] = useState(true);
   const [report, setReport] = useState(false);
@@ -47,6 +74,7 @@ function SubwayPage({ theme, lang }) {
     p: 4,
     borderRadius: '20px',
   };
+  
   const shareKakao = () => {
     window.Kakao.Share.sendCustom({
       templateId: 85076, 
@@ -492,14 +520,10 @@ const notifi=()=>{
             borderRight: 'solid white 1px',
             padding: '10px',
           }}
-        ><a  href="sms:15771234<?php echo (preg_match('/iPhone/', $_SERVER['HTTP_USER_AGENT'])) ? '&' : '?'; ?>body= <%=searchParams.get('carNo')%>칸 추워요 온도 높여주세요"class="sms" style={{position:'relative', color:theme.gray1}}>
+        ><a href="javascript:void(0)" onClick={()=>sendSMS(smstext=' 추워요 온도 높여주세요')} class="sms" style={{position:'relative', color:theme.gray1}}>
         
-
-          
-          
           <AcUnitIcon  style={{ color:'#00F5FF	', fontSize: '20px' }} />
           
-         
           </a>
           {{
             kor:'추워요',
@@ -518,7 +542,7 @@ const notifi=()=>{
           }}
         
         >
-          <a  href="sms:15771234<?php echo (preg_match('/iPhone/', $_SERVER['HTTP_USER_AGENT'])) ? '&' : '?'; ?>body= <%=searchParams.get('carNo')%>칸 더워요 온도 내려주세요"class="sms" style={{position:'relative', color:theme.gray1}}>
+          <a  href="javascript:void(0)" onClick={()=>sendSMS(smstext=' 더워요 온도 내려주세요')}class="sms" style={{position:'relative', color:theme.gray1}}>
           <AirIcon  style={{ color: '	#1E82FF', fontSize: '20px' }} />
           </a>
           {
@@ -534,7 +558,7 @@ const notifi=()=>{
         
         >
           
-          <a  href="sms:15771234<?php echo (preg_match('/iPhone/', $_SERVER['HTTP_USER_AGENT'])) ? '&' : '?'; ?>body= <%=searchParams.get('carNo')%>칸이 더러워요"class="sms" style={{position:'relative', color:theme.gray1}}>
+          <a  href="javascript:void(0)" onClick={()=>sendSMS(smstext=' 더러워요')}class="sms" style={{position:'relative', color:theme.gray1}}>
           <CleaningServicesIcon style={{ color: '92FF6B', fontSize: '20px' }} />
           </a>
           {
@@ -569,7 +593,7 @@ const notifi=()=>{
             borderRight: 'solid white 1px',
             padding: '10px',
           }}
-        ><a  href="sms:15771234<?php echo (preg_match('/iPhone/', $_SERVER['HTTP_USER_AGENT'])) ? '&' : '?'; ?>body= <%=searchParams.get('carNo')%>칸 마스크 안쓴사람 있어요"class="sms" style={{position:'relative', color:theme.gray1}}>
+        ><a  href="javascript:void(0)" onClick={()=>sendSMS(smstext=' 마스크 안쓴 사람있어요')}class="sms" style={{position:'relative', color:theme.gray1}}>
         
           <MasksIcon  style={{ color:'#000000	', fontSize: '20px' }} />
           
@@ -591,7 +615,7 @@ const notifi=()=>{
           }}
         
         >
-          <a  href="sms:15771234<?php echo (preg_match('/iPhone/', $_SERVER['HTTP_USER_AGENT'])) ? '&' : '?'; ?>body= <%=searchParams.get('carNo')%>칸 잡상인 있어요"class="sms" style={{position:'relative', color:theme.gray1}}>
+          <a  href="javascript:void(0)" onClick={()=>sendSMS(smstext=' 잡상인 있어요')}class="sms" style={{position:'relative', color:theme.gray1}}>
           <ProductionQuantityLimitsIcon  style={{ color: '#000000', fontSize: '20px' }} />
           </a>
           {
@@ -607,7 +631,7 @@ const notifi=()=>{
         
         >
           
-          <a  href="sms:15771234<?php echo (preg_match('/iPhone/', $_SERVER['HTTP_USER_AGENT'])) ? '&' : '?'; ?>body= <%=searchParams.get('carNo')%>칸"class="sms" style={{position:'relative', color:theme.gray1}}>
+          <a  href="javascript:void(0)" onClick={()=>sendSMS(smstext=' ')}class="sms" style={{position:'relative', color:theme.gray1}}>
           <ReportIcon style={{ color: '#EB0000', fontSize: '20px' }} />
           </a>
           {
