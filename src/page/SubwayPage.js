@@ -202,8 +202,8 @@ function SubwayPage({ theme, lang }) {
                 fontWeight: 600,
               }} //trainfo.statnTnm
             >
-              {{ kor: searchParams.get('subwayNm'), eng: searchParams.get('subwayNm').replace('호선', 'line') }[lang]}
-              {trainfo?.statnTnm ? ' - ' + { kor: trainfo?.statnTnm?.kor + '행', eng: trainfo?.statnTnm?.eng }[lang] : ''}
+              {{ kor: searchParams.get('subwayNm'), eng: 'Line ' + searchParams.get('subwayNm').replace('호선', '') }[lang]}
+              {trainfo?.statnTnm && trainfo?.statnTnm?.kor ? ' - ' + { kor: trainfo?.statnTnm?.kor + '행', eng: trainfo?.statnTnm?.eng }[lang] : ''}
             </div>
 
             <div
@@ -226,7 +226,7 @@ function SubwayPage({ theme, lang }) {
             <div
               style={{ color: '#ffffff', backgroundColor: '#777777', padding: '5px 12px', borderRadius: '20px', fontSize: '15px', fontWeight: 600 }}
             >
-              {{ kor: searchParams.get('carNo') + '칸', eng: searchParams.get('carNo') + 'space' }[lang]}
+              {{ kor: searchParams.get('carNo') + '칸', eng: 'No.' + searchParams.get('carNo') }[lang]}
             </div>
           </div>
 
