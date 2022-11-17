@@ -5,12 +5,10 @@ a {
   text-decoration: none;
 }
 
-.sms{
+.sms {
   display: block;
   text-align: center;
   width: 100%;
-    
-     
 }
 .toast-alert {
   background-color: rgba(255, 127, 80, 0.4);
@@ -27,9 +25,10 @@ a {
   display: flex;
   align-items: center;
   justify-content: center;
-  
-  bottom: 20px;
-  left: 20px;
+  z-index: 999;
+  position: absolute;
+  bottom: 140px;
+  margin: 0;
 }
 
 .toast-alert img {
@@ -74,4 +73,23 @@ a {
   to {
     transform: rotate(360deg);
   }
+}
+
+html,
+body {
+  position: fixed;
+}
+
+body {
+  margin: 0;
+  position: fixed;
+  -ms-overflow-style: none;
+  /* disable ios scroll refresh  */
+  overscroll-behavior: contain;
+  overscroll-behavior-y: contain;
+  overflow: hidden;
+}
+
+div#scrollbarDisable::-webkit-scrollbar {
+  display: none;
 }
