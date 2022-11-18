@@ -4,6 +4,7 @@ import cau.capstone.ottitor.domain.Station;
 import cau.capstone.ottitor.dto.*;
 import cau.capstone.ottitor.repository.StationRepository;
 import cau.capstone.ottitor.util.GeneralException;
+import cau.capstone.ottitor.util.TrainRouteDirection;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,12 +23,8 @@ import static cau.capstone.ottitor.constant.Code.SUBWAY_END;
 @Service
 public class SubwayService {
     private final StationRepository stationRepository;
-
     @Value("${api.key}")
     private String apiKey;
-
-    boolean cycle;
-    boolean reverse;
 
     public Object getRealTimeSubway(String subwayNm, String trainNo) {
 
@@ -104,11 +101,13 @@ public class SubwayService {
           해당 호선에 해당하는 역 정보들을 가져와 현재 사용자의 역을 기준으로 앞뒤에 있는 역의 리스트를 가져온다.
          */
 
+        TrainRouteDirection trainRouteDirection = new TrainRouteDirection();
+
         // 해당호선에 필요한 역들을 제외한 나머지 역들을 삭제.
         removeStation(realtimePositionResponseDto.getStatnNm().getKor(),
                 realtimePositionResponseDto.getStatnTnm().getKor(),
                 realtimePositionResponseDto.getDirectAt(),
-                subwayNm, stations);
+                subwayNm, stations, trainRouteDirection);
 
         // 출발역 또는 도착역이 신정지선 또는 성수지선일 경우 "지선"을 삭제.
         if (realtimePositionResponseDto.getStatnNm().getKor().contains("지선")) {
@@ -134,7 +133,7 @@ public class SubwayService {
             System.out.println(station.getNmKor());
         }
 
-        if (cycle) {
+        if (trainRouteDirection.isCycle()) {
             // 내선
             if (realtimePositionResponseDto.getUpdnLine() == 0) {
                 innerCycleLine(realtimePositionResponseDto, stations, realtimePositionResponseDto.getStatnNm().getKor());
@@ -147,7 +146,7 @@ public class SubwayService {
         }
 
         // 반대방향
-        else if (reverse) {
+        else if (trainRouteDirection.isReverse()) {
 
             // 상행일때 하행처럼 작동.
             if (realtimePositionResponseDto.getUpdnLine() == 0)
@@ -188,12 +187,10 @@ public class SubwayService {
 
         assert realtimeArrivalDto != null;
 
-        // 해당역에 접근중인 지하철이 없을 때. 문방향없이 반환.
-        // 테스트 필요.
         // 실시간 열차 도착정보 api 로 받아올 수 없는 역들이 존재함. 이 역들에 대한 api 요청을 하면 list 가 null 이 됨.
-
         if (realtimeArrivalDto.getRealtimeArrivalList() == null) {
             System.out.println("지하철 도착 list 가 비었음.");
+
             return realtimePositionResponseDto;
         }
 
@@ -406,7 +403,7 @@ public class SubwayService {
      * @param stations : 역 리스트
      */
     void removeStation(String curStation, String endStation, int directAt, String subwayNm,
-                       List<Station> stations) {
+                       List<Station> stations, TrainRouteDirection trainRouteDirection) {
 
         int curStationIndex = getStationIndex(stations, curStation);
         int endStationIndex = getStationIndex(stations, endStation);
@@ -455,7 +452,7 @@ public class SubwayService {
         else if (subwayNm.equals("2호선") && (curStationFrCode.contains("234-") || endStationFrCode.contains("234-")) ||
                 (curStation.equals("신도림지선") || endStation.equals("신도림지선"))) {
             stations.removeIf(station -> !station.getFrCode().contains("234"));
-            reverse = true;
+            trainRouteDirection.setReverse(true);
 
             System.out.println("<신정지선>");
         }
@@ -463,7 +460,7 @@ public class SubwayService {
         // 2호선 순환인경우.
         else if(subwayNm.equals("2호선")){
             stations.removeIf(station -> station.getFrCode().contains("-"));
-            cycle = true;
+            trainRouteDirection.setCycle(true);
 
             System.out.println("<순환>");
         }
@@ -541,7 +538,9 @@ public class SubwayService {
             throw new GeneralException(SUBWAY_END);
         }
 
-        removeStation(curStation, endStation, directAt, subwayNm, stations);
+        TrainRouteDirection trainRouteDirection = new TrainRouteDirection();
+
+        removeStation(curStation, endStation, directAt, subwayNm, stations, trainRouteDirection);
         List<ArrivalTimeResponseDto.ArrivalTime> arrivalTimeList = new ArrayList<>();
 
         return null;
