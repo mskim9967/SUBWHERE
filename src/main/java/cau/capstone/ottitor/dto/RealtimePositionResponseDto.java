@@ -8,7 +8,6 @@ import java.util.List;
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class RealtimePositionResponseDto {
-
     private StationNameDto.StationName statnNm;
     private Integer trainSttus;
     private StationNameDto.StationName statnTnm;

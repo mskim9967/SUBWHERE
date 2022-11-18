@@ -31,13 +31,19 @@ public class SubwayController {
         }
     }
 
-    @GetMapping(path = "/realtime")
-    public DataResponseDto<Object> getRealTimeSubwayTotal(@RequestParam String subwayNm) {
-        return DataResponseDto.of(subwayService.testRealtimePosition(subwayNm));
+    // 다음 도착역들에 대한 도착예정시간 반환.
+    @GetMapping(path = "/arrival")
+    public DataResponseDto<Object> getSubwayArrivalTime(@RequestParam String subwayNm, String trainNo) {
+        return DataResponseDto.of(subwayService.getArrivalTime(subwayNm, trainNo));
     }
 
-    @GetMapping(path = "/arrival")
-    public DataResponseDto<Object> getSubwayArrival(@RequestParam String statnNm) {
-        return DataResponseDto.of(subwayService.testSubwayArrival(statnNm));
+    @GetMapping(path = "/realtime")
+    public DataResponseDto<Object> getRealTimeSubwayTotal(@RequestParam String subwayNm) {
+        return DataResponseDto.of(subwayService.realtimePositionApi(subwayNm));
+    }
+
+    @GetMapping(path = "/station")
+    public DataResponseDto<Object> getRealtimeArrivalStation(@RequestParam String statnNm) {
+        return DataResponseDto.of(subwayService.subwayArrivalApi(statnNm));
     }
 }
