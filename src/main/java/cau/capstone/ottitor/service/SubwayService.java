@@ -77,12 +77,12 @@ public class SubwayService {
 
                     // 종착역이 "성수종착" 인 경우 빈 문자열로 설정.
                     if (dto.getStatnTnm().contains(station.getNmKor())) {
-                        if(dto.getStatnTnm().contains("종착"))
-                                realtimePositionResponseDto.setStatnTnm(new StationNameDto.StationName(
-                                        "", ""));
+                        if (dto.getStatnTnm().contains("종착"))
+                            realtimePositionResponseDto.setStatnTnm(new StationNameDto.StationName(
+                                    "", ""));
                         else
-                                realtimePositionResponseDto.setStatnTnm(new StationNameDto.StationName(
-                                station.getNmKor(), station.getNmEng()));
+                            realtimePositionResponseDto.setStatnTnm(new StationNameDto.StationName(
+                                    station.getNmKor(), station.getNmEng()));
                     }
                 }
 
@@ -153,20 +153,18 @@ public class SubwayService {
                 topToBottom(realtimePositionResponseDto, stations, realtimePositionResponseDto.getStatnNm().getKor(),
                         realtimePositionResponseDto.getStatnTnm().getKor());
 
-            // 하행일때 상행처럼 작동.
+                // 하행일때 상행처럼 작동.
             else
                 bottomToTop(realtimePositionResponseDto, stations, realtimePositionResponseDto.getStatnNm().getKor(),
                         realtimePositionResponseDto.getStatnTnm().getKor());
-        }
-
-        else {
+        } else {
 
             // 하행
             if (realtimePositionResponseDto.getUpdnLine() == 1)
                 topToBottom(realtimePositionResponseDto, stations, realtimePositionResponseDto.getStatnNm().getKor(),
                         realtimePositionResponseDto.getStatnTnm().getKor());
 
-            // 상행
+                // 상행
             else
                 bottomToTop(realtimePositionResponseDto, stations, realtimePositionResponseDto.getStatnNm().getKor(),
                         realtimePositionResponseDto.getStatnTnm().getKor());
@@ -396,11 +394,12 @@ public class SubwayService {
 
     /**
      * 출발지와 종착지를 고려하여 필요한 역들만 남기고 나머지역들을 제거하는 함수.
+     *
      * @param curStation : 현재 역 이름.
      * @param endStation : 종착역 이름.
-     * @param directAt : 급행 여부.
-     * @param subwayNm : 호선명
-     * @param stations : 역 리스트
+     * @param directAt   : 급행 여부.
+     * @param subwayNm   : 호선명
+     * @param stations   : 역 리스트
      */
     void removeStation(String curStation, String endStation, int directAt, String subwayNm,
                        List<Station> stations, TrainRouteDirection trainRouteDirection) {
@@ -458,7 +457,7 @@ public class SubwayService {
         }
 
         // 2호선 순환인경우.
-        else if(subwayNm.equals("2호선")){
+        else if (subwayNm.equals("2호선")) {
             stations.removeIf(station -> station.getFrCode().contains("-"));
             trainRouteDirection.setCycle(true);
 
@@ -490,7 +489,7 @@ public class SubwayService {
     public Object getArrivalTime(String subwayNm, String trainNo) {
 
         ArrivalTimeResponseDto arrivalTimeResponseDto = new ArrivalTimeResponseDto();
-        List<Station> stations = stationRepository.findByLineNumOrderByFrCodeAsc(0 + "subwayNm");
+        List<Station> stations = stationRepository.findByLineNumOrderByFrCodeAsc(0 + subwayNm);
 
         /*
           해당 호선의 모든 지하철 정보를 가져옴.
@@ -518,19 +517,35 @@ public class SubwayService {
 
         String curStation = "";
         String endStation = "";
-        int directAt = 0;
         int updnLine = 0;
+        int directAt = 0;
 
-        // 현재역과 종착역을 설정.
         for (RealtimePositionDto.RealtimePosition dto : realtimePositionDto.getRealtimePositionList()) {
             if (dto.getTrainNo().equals(trainNo)) {
                 find = true;
 
-                curStation = dto.getSubwayNm();
-                endStation = dto.getStatnTnm();
+
+
+                // 현재역과 종착역 이름 설정. () 가 들어가는 역이 있는경우 DB에 저장되어있는 역 이름으로 대체.
+                for (Station station : stations) {
+                    if (dto.getStatnNm().contains(station.getNmKor())) {
+                        curStation = station.getNmKor();
+                    }
+
+
+                    if (dto.getStatnTnm().contains(station.getNmKor())) {
+                        endStation = station.getNmKor();
+                    }
+                }
+
                 directAt = Integer.parseInt(dto.getDirectAt());
                 updnLine = Integer.parseInt(dto.getUpdnLine());
             }
+        }
+
+        if (directAt == 1) {
+            System.out.println("급행열차에 대한 도착시간 조회.");
+            return null;
         }
 
         // 실시간 위치정보에 요청한 지하철 번호가 존재하지않으면 운행 종료 표시.
@@ -543,60 +558,132 @@ public class SubwayService {
         removeStation(curStation, endStation, directAt, subwayNm, stations, trainRouteDirection);
         List<ArrivalTimeResponseDto.ArrivalTime> arrivalTimeList = new ArrayList<>();
 
-        return null;
+        // 상행과 하행이 반대 방향으로 작동하는 경우, updnLine을 재설정.
+        if (trainRouteDirection.isReverse()) updnLine = (updnLine == 0) ? 1 : 0;
+
+
+        if (trainRouteDirection.isCycle()) {
+            // 내선
+            if (updnLine == 0)
+                innerCycleGetNextStation(curStation, stations, arrivalTimeList);
+
+                // 외선
+            else
+                outerCycleGetNextStation(curStation, stations, arrivalTimeList);
+
+        } else {
+            // 하행
+            if (updnLine == 1)
+                topDownGetNextStation(curStation, endStation, stations, arrivalTimeList);
+
+                // 상행
+            else
+                bottomUpGetNextStation(curStation, endStation, stations, arrivalTimeList);
+
+        }
+
+        arrivalTimeResponseDto.setArrivalTimeList(arrivalTimeList);
+
+        return arrivalTimeResponseDto;
     }
 
+    void innerCycleGetNextStation(String curStation,
+                                  List<Station> stations,
+                                  List<ArrivalTimeResponseDto.ArrivalTime> arrivalTimeList) {
+
+        int curStationIndex = getStationIndex(stations, curStation);
+        int arrivalTimeSum = 0;
+
+        int i = curStationIndex;
+        int size = stations.size();
+
+        while (arrivalTimeList.size() < 10) {
+            i++;
+
+            arrivalTimeList.add(new ArrivalTimeResponseDto.ArrivalTime(
+                    new StationNameDto.StationName(stations.get(i % size).getNmKor(), stations.get(i % size).getNmEng()),
+                    stations.get(i % size).getMnt() + arrivalTimeSum
+            ));
+
+            arrivalTimeSum += stations.get(i % size).getMnt();
+        }
+    }
+
+    void outerCycleGetNextStation(String curStation,
+                                  List<Station> stations,
+                                  List<ArrivalTimeResponseDto.ArrivalTime> arrivalTimeList) {
+
+
+        int curStationIndex = getStationIndex(stations, curStation);
+        int arrivalTimeSum = 0;
+
+        int i = curStationIndex;
+        int size = stations.size();
+
+        while (arrivalTimeList.size() < 10) {
+            i--;
+
+            if (i < 0) {
+                i = size - 1;
+            }
+
+            arrivalTimeList.add(new ArrivalTimeResponseDto.ArrivalTime(
+                    new StationNameDto.StationName(stations.get(i).getNmKor(), stations.get(i).getNmEng()),
+                    stations.get((i + 1) % size).getMnt() + arrivalTimeSum
+            ));
+
+            arrivalTimeSum += stations.get((i + 1) % size).getMnt();
+        }
+    }
 
     /**
      * 위에서 아래로 훑으면서 도착예정시간을 계산하는 함수.
-     * @param curStation : 현재역
-     * @param endStation : 종착역
+     *
+     * @param curStation      : 현재역
+     * @param endStation      : 종착역
      * @param arrivalTimeList : 역 이름과 도착예정시간을 담고있는 list.
-     * 구현 미완료.
+     *                        구현 미완료.
      */
     void bottomUpGetNextStation(String curStation,
-                                   String endStation,
-                                   List<Station> stations,
-                                   List<ArrivalTimeResponseDto.ArrivalTime> arrivalTimeList) {
+                                String endStation,
+                                List<Station> stations,
+                                List<ArrivalTimeResponseDto.ArrivalTime> arrivalTimeList) {
 
         int curStationIndex = getStationIndex(stations, curStation);
         int endStationIndex = getStationIndex(stations, endStation);
-        int size = stations.size();
+        int arrivalTimeSum = 0;
 
         for (int i = curStationIndex - 1; i >= endStationIndex; i--) {
             arrivalTimeList.add(new ArrivalTimeResponseDto.ArrivalTime(
-                    new StationNameDto.StationName(stations.get(i % size).getNmKor(), stations.get(i % size).getNmEng()),
-                    stations.get(i % size).getMnt()
+                    new StationNameDto.StationName(stations.get(i).getNmKor(), stations.get(i).getNmEng()),
+                    stations.get(i + 1).getMnt() + arrivalTimeSum
             ));
+
+            arrivalTimeSum += stations.get(i + 1).getMnt();
         }
     }
 
     /**
      * 아래에서 위로 훑으면서 도착예정시간을 계산하는 함수.
-     * @param curStation : 현재역
-     * @param endStation : 종착역
+     *
+     * @param curStation      : 현재역
+     * @param endStation      : 종착역
      * @param arrivalTimeList : 역 이름과 도착예정시간을 담고있는 list.
-     * 구현 미완료.
+     *                        구현 미완료.
      */
     void topDownGetNextStation(String curStation,
-                                   String endStation,
-                                   List<Station> stations,
-                                   List<ArrivalTimeResponseDto.ArrivalTime> arrivalTimeList) {
+                               String endStation,
+                               List<Station> stations,
+                               List<ArrivalTimeResponseDto.ArrivalTime> arrivalTimeList) {
 
         int curStationIndex = getStationIndex(stations, curStation);
         int endStationIndex = getStationIndex(stations, endStation);
-        int size = stations.size();
-
         int arrivalTimeSum = 0;
-
-
-
-        // 순환 따로 처리.
 
         for (int i = curStationIndex + 1; i <= endStationIndex; i++) {
             arrivalTimeList.add(new ArrivalTimeResponseDto.ArrivalTime(
-                    new StationNameDto.StationName(stations.get(i % size).getNmKor(), stations.get(i % size).getNmEng()),
-                    stations.get(i % size).getMnt() + arrivalTimeSum
+                    new StationNameDto.StationName(stations.get(i).getNmKor(), stations.get(i).getNmEng()),
+                    stations.get(i).getMnt() + arrivalTimeSum
             ));
 
             arrivalTimeSum += stations.get(i).getMnt();
