@@ -7,26 +7,38 @@ import { useEffect, useState } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import SubwayPage from './page/SubwayPage';
 import { darkTheme, lightTheme } from './static/color';
+import VolumeOffIcon from '@mui/icons-material/VolumeOff';
+import VolumeUpIcon from '@mui/icons-material/VolumeUp';
 function App() {
-  const [menuActive, setMenuActive] = useState(false);
   const [theme, setTheme] = useState(lightTheme);
+  const [isDark, setDark] = useState(false);
+  const [isSound, setSound] = useState(true);
+  const [menuActive, setMenuActive] = useState(false);
   const [lang, setLang] = useState('kor');
 
   let navigate = useNavigate();
 
-  useEffect(() => {}, []);
+  useEffect(() => {
+    console.log(localStorage.getItem('sdfds'));
+    if (localStorage.getItem('isDark') !== null) setDark(localStorage.getItem('isDark') === 'true');
+    if (localStorage.getItem('lang') !== null) setLang(localStorage.getItem('lang'));
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('isDark', isDark);
+    localStorage.setItem('lang', lang);
+  }, [isDark, lang]);
+
+  useEffect(() => {
+    setTheme(isDark ? darkTheme : lightTheme);
+  }, [isDark]);
 
   return (
-    <div className='App' style={{ backgroundColor: theme.bg1, minHeight: '100vh' }}>
-      <Routes>
-        <Route exact path='/subway' element={<SubwayPage lang={lang} theme={theme} />}></Route>
-        <Route path='/lost-item' element={<div>lost-item</div>}></Route>
-      </Routes>
-
+    <div className='App' style={{ width: '100vw', height: window.innerHeight, overflow: 'scroll', backgroundColor: theme.bg1 }}>
       <div
         style={{
           position: 'fixed',
-          bottom: 30,
+          top: 40,
           right: 30,
           display: 'flex',
           alignItems: 'center',
@@ -42,58 +54,42 @@ function App() {
       >
         {menuActive ? (
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: theme.text1, gap: 20, overflow: 'hidden' }}>
-            <div
-              onClick={() => {
-                navigate('/subway');
-              }}
-            >
-              {{
-                kor:'지하철 정보',
-                eng:'subway information'
-              }[lang]}
-            </div>
-            <div>{{
-              kor:'역 정보',
-              eng:'station information'
-            }[lang]}</div>
-            <div
-              onClick={() => {
-                navigate('/lost-item');
-              }}
-            >
-              {
-                {
-                  kor:'분실물 조회',
-                  eng:'lost and found'
-                }[lang]
-              }
-            </div>
+            <IconButton
+            size='large'
+            style={{ color: theme.text1 }}
+            onClick={() => {
+              setDark(!isDark);
+            }}
+          >
+            {isDark ? <MdLightMode /> : <MdDarkMode />}
+          </IconButton>
+
+          <Button size='large' style={{ color: theme.text1 }} onClick={() => setLang(lang === 'kor' ? 'eng' : 'kor')}>
+            {lang === 'kor' ? 'ENG' : 'KOR'}
+          </Button>
+
+          <IconButton
+            size='large'
+            style={{ color: theme.text1 }}
+            onClick={() => {
+              setSound(!isSound);
+            }}
+          >
+            {isSound ? <VolumeOffIcon /> : <VolumeUpIcon />}
+          </IconButton>
+          
+          
           </div>
         ) : (
           <RiMenuFill style={{ color: theme.text1, fontSize: '20px' }} />
         )}
       </div>
-
-      <div
-        style={{
-          position: 'fixed',
-          top: 20,
-          right: 30,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 999,
-          height: '50px',
-        }}
-      >
-        <IconButton size='large' style={{ color: theme.text1 }} onClick={() => setTheme(theme === darkTheme ? lightTheme : darkTheme)}>
-          {theme === darkTheme ? <MdLightMode /> : <MdDarkMode />}
-        </IconButton>
-
-        <Button size='large' style={{ color: theme.text1 }} onClick={() => setLang(lang === 'kor' ? 'eng' : 'kor')}>
-          {lang === 'kor' ? 'ENG' : 'KOR'}
-        </Button>
+      <div style={{ width: '100%', height: '130px', position: 'relative' }}>
+       
       </div>
+      <Routes>
+        <Route exact path='/subway' element={<SubwayPage lang={lang} theme={theme} sound={isSound} />}></Route>
+      </Routes>
     </div>
   );
 }

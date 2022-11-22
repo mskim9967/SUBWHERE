@@ -9,14 +9,18 @@ function ToastNotification(props) {
     window.speechSynthesis.speak(msg)
   }
   useEffect(() => {
+    if(props.sound==true){
     speechHandler(msg)
+    }
 }, []);
     
     useEffect(() => {
         let timer = setTimeout(() => {
             props.setToastState(false);
             console.log('change');		
-            speechHandler(msg)
+            if(props.sound==true){
+                speechHandler(msg)
+                }
     
         }, 5000);
 
