@@ -223,7 +223,7 @@ function SubwayPage({ theme, lang ,sound}) {
                 borderRadius: '20px',
                 fontSize: '15px',
                 fontWeight: 600,
-              }} //trainfo.statnTnm
+              }} //trainfo.statnTnmd
             >
               {{ kor: searchParams.get('subwayNm'), eng: 'Line ' + searchParams.get('subwayNm').replace('호선', '') }[lang]}
               {trainfo?.statnTnm && trainfo?.statnTnm?.kor ? ' - ' + { kor: trainfo?.statnTnm?.kor + '행', eng: trainfo?.statnTnm?.eng }[lang] : ''}
