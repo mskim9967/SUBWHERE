@@ -13,8 +13,13 @@ import AirIcon from '@mui/icons-material/Air';
 import { ToastNotification } from '../ToastNotification';
 import ReportIcon from '@mui/icons-material/Report';
 import ProductionQuantityLimitsIcon from '@mui/icons-material/ProductionQuantityLimits';
+import { Block } from '@mui/icons-material';
 
 function SubwayPage({ theme, lang ,sound}) {
+  
+
+
+
   var smstext = '';
 
   function sendSMS(smstext) {
@@ -38,16 +43,31 @@ function SubwayPage({ theme, lang ,sound}) {
     const hou=date.getHours();
     var total='';
     if(min<60){
+      if(min<10){
+        total=hou+':0'+min
+      }else{
       total= hou+':'+min
+      }
       return total
     }else if(min<120){
-      total= hou+1 +':'+(min-60)
+      if(min-60<10){
+      total= hou+1 +':0'+(min-60)
+      }else{
+        total= hou+1 +':'+(min-60)
+      }
       return total
     }else if(min<180){
-      total= hou+2 +':'+(min-120)
+      if(min-120<10){
+        total= hou+2 +':0'+(min-120)
+      }else{
+        total= hou+2 +':'+(min-120)
+      }
       return total
     }else if (min<240){
-      total= hou+3 +':'+(min-180)
+      if(min-180<10){
+        total= hou+3 +':0'+(min-180)
+      }else{
+        total= hou+3 +':'+(min-180)}
       return total
     }
     
@@ -81,6 +101,7 @@ function SubwayPage({ theme, lang ,sound}) {
     boxShadow: 24,
     p: 4,
     borderRadius: '20px',
+    
   };
 
   const shareKakao = () => {
@@ -552,8 +573,12 @@ function SubwayPage({ theme, lang ,sound}) {
           </a>
           <div style={{ letterSpacing: '-0.6px' }}>Copyright © SUBWHERE. All right reserved.</div>
         </div>
-        <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
-          <Box sx={style}>
+
+        <Modal open={modalOpen}   onClose={() => setModalOpen(false)}>
+          <Box className='wrapModal' style={{
+  color: theme.gray1,
+  backgroundColor:theme.bg1,
+  bordercolor: theme.gray1,}}>
             <Typography id='modal-modal-title' variant='h6' component='h2'>
               {
                 {
@@ -565,14 +590,15 @@ function SubwayPage({ theme, lang ,sound}) {
             <Typography id='modal-modal-description' sx={{ mt: 2 }}>
               {
                 {
-                  kor:<p>{nexinfo.map(value=>(<p key={value.arrivalTime}>{value.statnNm.kor} {addTime(value.arrivalTime)}</p>))}</p>,
+                  kor:<p>{nexinfo.map(value=>(<p key={value.arrivalTime}>{addTime(value.arrivalTime)} {value.statnNm.kor} </p>))}</p>,
                   eng: <p>{nexinfo.map(value=>(<p key={value.arrivalTime}>{value.statnNm.eng} {addTime(value.arrivalTime)}</p>))}</p>,
                 }[lang]
               }
             </Typography>
           </Box>
-        </Modal>
-        <Modal open={report} onClose={() => setReport(false)}>
+            </Modal>
+
+        <Modal open={report}  onClose={() => setReport(false)}>
           <Box sx={style}>
             <Typography id='modal-modal-title' variant='h6' component='h2'>
               {
