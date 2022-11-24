@@ -13,12 +13,26 @@ import AirIcon from '@mui/icons-material/Air';
 import { ToastNotification } from '../ToastNotification';
 import ReportIcon from '@mui/icons-material/Report';
 import ProductionQuantityLimitsIcon from '@mui/icons-material/ProductionQuantityLimits';
-import { Block } from '@mui/icons-material';
+import Snackbar from '@mui/material/Snackbar';
+import MuiAlert from '@mui/material/Alert';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
 
-function SubwayPage({ theme, lang ,sound}) {
-  
+const Alert = React.forwardRef(function Alert(props, ref) {
+  return <MuiAlert elevation={6} ref={ref} variant='filled' {...props} />;
+});
 
-
+function SubwayPage({ theme, lang, sound }) {
+  const tableStyle = {
+    borderTop: `1px solid ${theme.gray7}`,
+    color: theme.gray2,
+    borderRight: 0,
+    borderLeft: 0,
+  };
 
   var smstext = '';
 
@@ -38,47 +52,46 @@ function SubwayPage({ theme, lang ,sound}) {
       window.location.href = 'sms:15771234&body=' + text;
     }
   }
-  const addTime=(arrivalTime)=>{
-    const min=date.getMinutes()+arrivalTime
-    const hou=date.getHours();
-    var total='';
-    if(min<60){
-      if(min<10){
-        total=hou+':0'+min
-      }else{
-      total= hou+':'+min
+  const addTime = (arrivalTime) => {
+    const min = date.getMinutes() + arrivalTime;
+    const hou = date.getHours();
+    var total = '';
+    if (min < 60) {
+      if (min < 10) {
+        total = hou + ':0' + min;
+      } else {
+        total = hou + ':' + min;
       }
-      return total
-    }else if(min<120){
-      if(min-60<10){
-      total= hou+1 +':0'+(min-60)
-      }else{
-        total= hou+1 +':'+(min-60)
+      return total;
+    } else if (min < 120) {
+      if (min - 60 < 10) {
+        total = hou + 1 + ':0' + (min - 60);
+      } else {
+        total = hou + 1 + ':' + (min - 60);
       }
-      return total
-    }else if(min<180){
-      if(min-120<10){
-        total= hou+2 +':0'+(min-120)
-      }else{
-        total= hou+2 +':'+(min-120)
+      return total;
+    } else if (min < 180) {
+      if (min - 120 < 10) {
+        total = hou + 2 + ':0' + (min - 120);
+      } else {
+        total = hou + 2 + ':' + (min - 120);
       }
-      return total
-    }else if (min<240){
-      if(min-180<10){
-        total= hou+3 +':0'+(min-180)
-      }else{
-        total= hou+3 +':'+(min-180)}
-      return total
+      return total;
+    } else if (min < 240) {
+      if (min - 180 < 10) {
+        total = hou + 3 + ':0' + (min - 180);
+      } else {
+        total = hou + 3 + ':' + (min - 180);
+      }
+      return total;
     }
-    
-
-  }
+  };
 
   const [nowtrain, setNowtrain] = useState(true);
   const [report, setReport] = useState(false);
-  const date=new Date();
+  const date = new Date();
 
-  let [toastState, setToastState] = useState(false); 
+  let [toastState, setToastState] = useState(false);
   let [timeState, setTimeState] = useState(5);
   const [searchParams, setSearchParams] = useSearchParams();
   const [modalOpen, setModalOpen] = useState(false);
@@ -101,7 +114,6 @@ function SubwayPage({ theme, lang ,sound}) {
     boxShadow: 24,
     p: 4,
     borderRadius: '20px',
-    
   };
 
   const shareKakao = () => {
@@ -121,12 +133,8 @@ function SubwayPage({ theme, lang ,sound}) {
     axiosInstance
       .get(`/subway/arrival?subwayNm=${searchParams.get('subwayNm')}&trainNo=${searchParams.get('trainNo')}`)
       .then((res) => {
-        
         setNexinfo(res.data.data.arrivalTimeList);
-        console.log(date.getMinutes())
-        
-        
-        
+        console.log(date.getMinutes());
       })
       .catch(function (error) {
         if (error.response) {
@@ -145,7 +153,6 @@ function SubwayPage({ theme, lang ,sound}) {
         }
         console.log(error.config);
       });
-      
   };
 
   const Inforeceive = () => {
@@ -318,7 +325,7 @@ function SubwayPage({ theme, lang ,sound}) {
               <div style={{ fontSize: '70px', fontWeight: '700', letterSpacing: 0, color: theme.gray1, whiteSpace: 'pre-line' }}>
                 {
                   {
-                    false: '운행 종료',
+                    false: { kor: '운행 종료', eng: 'Ended Train' }[lang],
                     true: {
                       kor:
                         trainfo?.statnNm?.kor.length > 5 ? (
@@ -443,12 +450,20 @@ function SubwayPage({ theme, lang ,sound}) {
               }
             </div>
           </div>
+
+          <Snackbar open={toastState} autoHideDuration={4000}>
+            <Alert severity='info' sx={{ width: '70%', margin: '0 auto 10vh auto', fontSize: '17px' }}>
+              {{ kor: trainfo?.statnNm?.kor + '역 접근', eng: trainfo?.statnNm?.eng + ' approach' }[lang]}
+            </Alert>
+          </Snackbar>
+
           {
             {
               true: (
                 <ToastNotification
                   setToastState={setToastState}
-                  lang={lang} sound={sound}
+                  lang={lang}
+                  sound={sound}
                   train={{ kor: trainfo?.statnNm?.kor, eng: trainfo?.statnNm?.eng }[lang]}
                 ></ToastNotification>
               ),
@@ -479,6 +494,7 @@ function SubwayPage({ theme, lang ,sound}) {
               gap: 5,
               borderRight: 'solid white 1px',
               padding: '10px',
+              ...(!nowtrain && { pointerEvents: 'none', opacity: '0.25' }),
             }}
             onClick={() => {
               setReport(true);
@@ -510,6 +526,7 @@ function SubwayPage({ theme, lang ,sound}) {
               gap: 5,
               borderRight: 'solid white 1px',
               padding: '10px',
+              ...(!nowtrain && { pointerEvents: 'none', opacity: '0.25' }),
             }}
           >
             <RiKakaoTalkFill style={{ color: 'FFE600', fontSize: '20px' }} />
@@ -528,11 +545,18 @@ function SubwayPage({ theme, lang ,sound}) {
             }
           </div>
           <div
-            style={{ width: '90px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, padding: '10px' }}
+            style={{
+              width: '90px',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: 5,
+              padding: '10px',
+              ...((trainfo?.directAt == 1 || !nowtrain) && { pointerEvents: 'none', opacity: '0.25' }),
+            }}
             onClick={() => {
               Nextreceive();
               setModalOpen(true);
-              
             }}
           >
             <RiTimeFill style={{ color: '92FF6B', fontSize: '20px' }} />
@@ -545,7 +569,7 @@ function SubwayPage({ theme, lang ,sound}) {
             <br />
             {
               {
-                kor: '예정 시간',
+                kor: '예정 시각',
                 eng: ' ',
               }[lang]
             }
@@ -574,31 +598,60 @@ function SubwayPage({ theme, lang ,sound}) {
           <div style={{ letterSpacing: '-0.6px' }}>Copyright © SUBWHERE. All right reserved.</div>
         </div>
 
-        <Modal open={modalOpen}   onClose={() => setModalOpen(false)}>
-          <Box className='wrapModal' style={{
-  color: theme.gray1,
-  backgroundColor:theme.bg1,
-  bordercolor: theme.gray1,}}>
-            <Typography id='modal-modal-title' variant='h6' component='h2'>
+        <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
+          <Box
+            className='wrapModal'
+            style={{
+              color: theme.gray1,
+              backgroundColor: theme.bg1,
+              bordercolor: theme.gray1,
+              padding: '20px',
+              boxSizing: 'border-box',
+              overflow: 'scroll',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: 15,
+              maxHeight: '70vh',
+            }}
+          >
+            <Typography sx={{ fontWeight: '700', fontSize: '22px', letterSpacing: '-0.7px' }}>
               {
                 {
-                  kor: '도착 예정 시간',
-                  eng: 'estimated time of arrival',
+                  kor: '도착 예정 시각',
+                  eng: 'Estimated Arrival Time',
                 }[lang]
               }
             </Typography>
-            <Typography id='modal-modal-description' sx={{ mt: 2 }}>
-              {
-                {
-                  kor:<p>{nexinfo.map(value=>(<p key={value.arrivalTime}>{addTime(value.arrivalTime)} {value.statnNm.kor} </p>))}</p>,
-                  eng: <p>{nexinfo.map(value=>(<p key={value.arrivalTime}>{value.statnNm.eng} {addTime(value.arrivalTime)}</p>))}</p>,
-                }[lang]
-              }
-            </Typography>
-          </Box>
-            </Modal>
 
-        <Modal open={report}  onClose={() => setReport(false)}>
+            <TableContainer sx={{ color: theme.gray1 }}>
+              <Table size='small'>
+                <TableHead>
+                  <TableRow>
+                    <TableCell sx={{ ...tableStyle, fontWeight: '200', color: theme.gray1, borderBottom: `solid ${theme.gray4} 1px` }} align='right'>
+                      {{ kor: '역', eng: 'Station' }[lang]}
+                    </TableCell>
+                    <TableCell sx={{ ...tableStyle, fontWeight: '200', color: theme.gray1, borderBottom: `solid ${theme.gray4} 1px` }}>
+                      {{ kor: '시각', eng: 'Time' }[lang]}
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {nexinfo.map((value, i) => (
+                    <TableRow key={i}>
+                      <TableCell sx={{ ...tableStyle, letterSpacing: '-0.5px' }} align='right'>
+                        {{ kor: value.statnNm.kor, eng: value.statnNm.eng }[lang]}
+                      </TableCell>
+                      <TableCell sx={{ ...tableStyle, fontWeight: '600' }}>{addTime(value.arrivalTime)}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Box>
+        </Modal>
+
+        <Modal open={report} onClose={() => setReport(false)}>
           <Box sx={style}>
             <Typography id='modal-modal-title' variant='h6' component='h2'>
               {
