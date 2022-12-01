@@ -99,8 +99,10 @@ function SubwayPage({ theme, lang, sound }) {
   const [trainfo, setTrainfo] = useState([]);
   const [nexinfo, setNexinfo] = useState([]);
   const colors = ['#0d3692', '#33a23d', '#fe5d10', '#00a2d1', '#8b50a4', '#c55c1d', '#54640d', '#f14c82', '#aa9872'];
-  let asd = searchParams.get('subwayNm'); //subwayNm으로 체크할거임
-  const linecolor = colors[asd.replace('호선', '') - 1]; //subwayNm으로 체크할거임 get.replace~~
+  let kakaosubwayNm = searchParams.get('subwayNm'); //subwayNm으로 체크할거임
+  let kakaotrainNo=searchParams.get('trainNo');
+  let kakaocarNo=searchParams.get('carNo');
+  const linecolor = colors[kakaosubwayNm.replace('호선', '') - 1]; //subwayNm으로 체크할거임 get.replace~~
   const style = {
     color: theme.gray1,
     position: 'absolute',
@@ -125,6 +127,7 @@ function SubwayPage({ theme, lang, sound }) {
           kor: { 0: '역에 진입 하였습니다', 1: '역에 도착하였습니다', 2: '역에서 출발하였습니다', 3: '역에서 출발하였습니다' }[trainfo.trainSttus],
           eng: { 0: ' approach', 1: ' arrival', 2: ' leave', 3: ' leave' }[trainfo.trainSttus],
         }[lang],
+        address: '?subwayNm='+kakaosubwayNm+'&trainNo='+kakaotrainNo+'&carNo='+kakaocarNo
       },
     });
   };
@@ -803,7 +806,7 @@ function SubwayPage({ theme, lang, sound }) {
                 </a>
                 {
                   {
-                    kor: '잡상인신고',
+                    kor: '잡상인 신고',
                     eng: 'hawker',
                   }[lang]
                 }
