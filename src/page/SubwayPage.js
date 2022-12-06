@@ -213,6 +213,7 @@ function SubwayPage({ theme, lang, sound }) {
         style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center' }}
         onClick={() => {
           Inforeceive();
+          console.log(trainfo.curPosition)
           setTimeState((fontRef.current += 1));
         }}
       >
@@ -453,6 +454,7 @@ function SubwayPage({ theme, lang, sound }) {
               }
             </div>
           </div>
+          <img src="train_head.png" style={{position: 'absolute',width: '30px',height:'15px', top:350,left:trainfo.curPosition*85+'%'}}/>
 
           <Snackbar open={toastState} autoHideDuration={4000}>
             <Alert severity='info' sx={{ width: '70%', margin: '0 auto 10vh auto', fontSize: '17px' }}>
