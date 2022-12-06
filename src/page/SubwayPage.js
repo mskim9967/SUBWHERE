@@ -454,7 +454,32 @@ function SubwayPage({ theme, lang, sound }) {
               }
             </div>
           </div>
-          <img src="train_head.png" style={{position: 'absolute',width: '30px',height:'15px', top:350,left:trainfo.curPosition*85+'%'}}/>
+          <div style={{display:'flex',marginBottom:'20px'}}>
+            {
+              {true:{kor:<div>
+                <div style={{position: 'absolute',zIndex:9,left:23,borderRadius:10,width: '8px',height:'8px',marginTop: '26px',backgroundColor:'black' }}></div>
+                <img src="train_head.png" style={{position: 'absolute',width: '30px',height:'15px',marginTop:'10px', left:5+(Math.abs(trainfo.curPosition)*80)+'%',marginBottom: '50px' }}/>
+                <div style={{position: 'absolute',zIndex:9,left:329,borderRadius:10,width: '8px',height:'8px',marginTop: '26px',backgroundColor:'black' }}></div>
+              <div style={{position: 'absolute',left:30,width: '300px',height:'5px',marginTop:'10px',marginTop: '28px',backgroundColor:linecolor }}></div>
+              <div style={{position: 'absolute',fontWeight:700,left:-110+(trainfo?.statnNm?.kor.length*2),width: '300px',height:'5px',marginTop: '32px' }}>{trainfo?.statnNm?.kor}</div>
+              <div style={{position: 'absolute',fontWeight:700,left:170-(trainfo?.nextStatns?.stationNameList[0]?.kor.length*2),width: '300px',height:'5px',marginTop: '32px' }}>{trainfo?.nextStatns?.stationNameList[0]?.kor}</div>
+              </div>,
+              eng:<div>
+              <div style={{position: 'absolute',zIndex:9,left:23,borderRadius:10,width: '8px',height:'8px',marginTop: '26px',backgroundColor:'black' }}></div>
+              <img src="train_head.png" style={{position: 'absolute',width: '30px',height:'15px',marginTop:'10px', left:5+(Math.abs(trainfo.curPosition)*80)+'%',marginBottom: '50px' }}/>
+              <div style={{position: 'absolute',zIndex:9,left:329,borderRadius:10,width: '8px',height:'8px',marginTop: '26px',backgroundColor:'black' }}></div>
+            <div style={{position: 'absolute',left:30,width: '300px',height:'5px',marginTop:'10px',marginTop: '28px',backgroundColor:linecolor }}></div>
+            <div style={{position: 'absolute',fontWeight:700,left:-110+(trainfo?.statnNm?.eng.length*2),width: '300px',height:'5px',marginTop: '32px' }}>{trainfo?.statnNm?.eng}</div>
+            <div style={{position: 'absolute',fontWeight:700,left:150-(trainfo?.nextStatns?.stationNameList[0]?.eng.length*2),width: '300px',height:'5px',marginTop: '32px' }}>{trainfo?.nextStatns?.stationNameList[0]?.eng}</div>
+            </div>
+            
+            }[lang]
+              ,
+            false:''}[nowtrain]
+            }
+            
+          </div>
+          
 
           <Snackbar open={toastState} autoHideDuration={4000}>
             <Alert severity='info' sx={{ width: '70%', margin: '0 auto 10vh auto', fontSize: '17px' }}>
