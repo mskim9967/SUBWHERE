@@ -19,16 +19,11 @@ public class SubwayController {
 
     @GetMapping(path = "")
     public DataResponseDto<Object> getRealtimeSubway(
-        @RequestParam String subwayNm,
-        @RequestParam(required = false) String trainNo,
-        @RequestParam(required = false) String test
-    ) {
+            @RequestParam String subwayNm,
+            @RequestParam String trainNo
+            ) {
 
-        if ("true".equals(test)) {
-            return DataResponseDto.of(subwayService.testRealtimePositionTemp(subwayNm));
-        } else {
-            return DataResponseDto.of(subwayService.getRealTimeSubway(subwayNm, trainNo));
-        }
+        return DataResponseDto.of(subwayService.getRealTimeSubway(subwayNm, trainNo));
     }
 
     // 다음 도착역들에 대한 도착예정시간 반환.

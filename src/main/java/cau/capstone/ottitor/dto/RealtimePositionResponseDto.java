@@ -16,4 +16,5 @@ public class RealtimePositionResponseDto {
     private StationNameDto prevStatns;
     private StationNameDto nextStatns;
     private Integer subwayHeading;
+    private Double curPosition;
 }

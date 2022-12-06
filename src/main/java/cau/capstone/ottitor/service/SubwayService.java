@@ -7,12 +7,17 @@ import cau.capstone.ottitor.util.GeneralException;
 import cau.capstone.ottitor.util.TrainRouteDirection;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.jni.Local;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static cau.capstone.ottitor.constant.Code.SUBWAY_END;
@@ -21,6 +26,7 @@ import static cau.capstone.ottitor.constant.Code.SUBWAY_END;
 @RequiredArgsConstructor
 @Transactional
 @Service
+
 public class SubwayService {
     private final StationRepository stationRepository;
     @Value("${api.key}")
@@ -69,7 +75,7 @@ public class SubwayService {
                 find = true;
 
                 for (Station station : stations) {
-                    if (dto.getStatnNm().contains(station.getNmKor())) {
+                    if (station.getNmKor().contains(dto.getStatnNm())) {
                         realtimePositionResponseDto.setStatnNm(new StationNameDto.StationName(
                                 station.getNmKor(), station.getNmEng()
                         ));
@@ -89,6 +95,8 @@ public class SubwayService {
                 realtimePositionResponseDto.setTrainSttus(Integer.parseInt(dto.getTrainSttus()));
                 realtimePositionResponseDto.setDirectAt(Integer.parseInt(dto.getDirectAt()));
                 realtimePositionResponseDto.setUpdnLine(Integer.parseInt(dto.getUpdnLine()));
+
+                break;
             }
         }
 
@@ -168,12 +176,12 @@ public class SubwayService {
             else
                 bottomToTop(realtimePositionResponseDto, stations, realtimePositionResponseDto.getStatnNm().getKor(),
                         realtimePositionResponseDto.getStatnTnm().getKor());
-
         }
 
 
         /*
           역 이름을 이용하여 해당 역의 실시간 도착정보를 가져온 후 열차번호를 이용하여 열차를 뽑아낸다 그 후 해당 열차가 해당 역에서 어떤방향으로 문이 열리는지 가져온다.
+          또한 해당열차가 해당역에 언제 도착하는지를 받아온다.
          */
         RealtimeArrivalDto realtimeArrivalDto =
                 restTemplate.exchange(
@@ -185,18 +193,128 @@ public class SubwayService {
 
         assert realtimeArrivalDto != null;
 
-        // 실시간 열차 도착정보 api 로 받아올 수 없는 역들이 존재함. 이 역들에 대한 api 요청을 하면 list 가 null 이 됨.
-        if (realtimeArrivalDto.getRealtimeArrivalList() == null) {
-            System.out.println("지하철 도착 list 가 비었음.");
+        // 해당역에 들어오는 열차 중 사용자가 타고 있는 열차를 찾아서 curStationSubway 변수에 저장.
+        RealtimeArrivalDto.RealtimeArrival curStationSubway = null;
 
-            return realtimePositionResponseDto;
+        if (realtimeArrivalDto.getRealtimeArrivalList() != null) {
+            for (RealtimeArrivalDto.RealtimeArrival realtimeArrival : realtimeArrivalDto.getRealtimeArrivalList()) {
+                if (realtimeArrival.getBtrainNo().equals(trainNo)) {
+                    curStationSubway = realtimeArrival;
+                    break;
+                }
+            }
         }
 
-        // 열차의 문 방향이 왼쪽이면 0, 오른쪽이면 1 저장.
-        // 해당 열차가 해당역을 출발했을 때 이미 출발했으므로 해당역에 도착정보가 안나오는 경우가 발생할 수 있음. 예외처리 필요.
-        for (RealtimeArrivalDto.RealtimeArrival realtimeArrival : realtimeArrivalDto.getRealtimeArrivalList()) {
-            if (realtimeArrival.getBtrainNo().equals(trainNo)) {
-                realtimePositionResponseDto.setSubwayHeading((realtimeArrival.getSubwayHeading().equals("왼쪽")) ? 0 : 1);
+        // 실시간 열차 도착정보 api 로 받아올 수 없는 역들이 존재함. 이 역들에 대한 api 요청을 하면 list 가 null 이 됨.
+        else {
+            System.out.println("지하철 도착 list 가 비었음.");
+        }
+
+        // 열차가 해당역에 도착했을 경우, curStationSubway == null 일 수 있음. 문방향 생략. 따로 처리 필요.
+
+        // 문방향이 왼쪽이면 0, 오른쪽이면 1 설정.
+        if (curStationSubway != null) {
+            realtimePositionResponseDto.setSubwayHeading((curStationSubway.getSubwayHeading().equals("왼쪽")) ? 0 : 1);
+        }
+
+        // 해당 열차의 상태 (0/1/ext : 진입/도착/출발)
+        int trainSttus = realtimePositionResponseDto.getTrainSttus();
+
+        // 시간을 parsing 하기위한 객체.
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+        // 열차가 현재역에 진입인 경우.
+        if (trainSttus == 0) {
+            realtimePositionResponseDto.setCurPosition(0.9);
+        }
+
+        // 열차가 현재역에 도착한 경우.
+        else if (trainSttus == 1) {
+            realtimePositionResponseDto.setCurPosition(1.0);
+        }
+
+        // 열차가 다음역으로 출발한 경우.
+        else {
+
+            // 열차의 다음역이 존재하지 않는경우. 현재위치 표시 제거.
+            if (realtimePositionResponseDto.getNextStatns().getStationNameList() == null) {
+                return realtimePositionResponseDto;
+            }
+
+            String nextStation = realtimePositionResponseDto.getNextStatns().getStationNameList().get(0).getKor();
+            System.out.println("nextStation = " + nextStation);
+
+            RealtimeArrivalDto nextStationRealtimeArrivalDto =
+                    restTemplate.exchange(
+                            "http://swopenAPI.seoul.go.kr/api/subway/" + apiKey + "/json/realtimeStationArrival/0/100/" + nextStation,
+                            HttpMethod.GET,
+                            null,
+                            RealtimeArrivalDto.class
+                    ).getBody();
+
+            assert nextStationRealtimeArrivalDto != null;
+
+            // 해당역에 들어오는 열차 중 사용자가 타고 있는 열차를 찾아서 curStationSubway 변수에 저장.
+            RealtimeArrivalDto.RealtimeArrival nextStationSubway = null;
+
+            if (realtimeArrivalDto.getRealtimeArrivalList() != null) {
+                for (RealtimeArrivalDto.RealtimeArrival realtimeArrival : nextStationRealtimeArrivalDto.getRealtimeArrivalList()) {
+                    if (realtimeArrival.getBtrainNo().equals(trainNo)) {
+                        nextStationSubway = realtimeArrival;
+                        break;
+                    }
+                }
+            }
+
+            // 다음역에 해당열차가 존재하지 않으면 api 문제.
+            if (nextStationSubway == null) {
+                System.out.println("nextStationSubway == null");
+                return realtimePositionResponseDto;
+            }
+
+            // nextStationSubway == null 이 나오는 현상 속출.
+            String nextStationRecptnDt = nextStationSubway.getRecptnDt();
+
+            LocalDateTime nextStationRequestTime = LocalDateTime.parse(nextStationRecptnDt, formatter);
+            LocalDateTime now = LocalDateTime.now();
+
+            Duration duration = Duration.between(nextStationRequestTime, now);
+            int diff = (int) duration.getSeconds();
+
+            System.out.println("nextStationRequestTime = " + nextStationRequestTime);
+            System.out.println("now = " + now);
+            System.out.println("다음역 도착에정시간 : " + nextStationSubway.getBarvlDt());
+
+            // 정확한 현재역에 대한 도착예정시간.
+            int nextStationBalvlDt = Integer.parseInt(nextStationSubway.getBarvlDt()) - diff;
+
+            System.out.println("실제 도착예정 시간 : " + nextStationBalvlDt);
+
+            // 열차 도착 예정시간 api 를 내부에서 호출.
+            ArrivalTimeResponseDto arrivalTimeResponseDto = (ArrivalTimeResponseDto) getArrivalTime(subwayNm, trainNo);
+
+            // 열차가 다음역에 도착하는 시간.
+            int arrivalTime = arrivalTimeResponseDto.getArrivalTimeList().get(0).getArrivalTime();
+
+            int arrivalTimeSec = arrivalTime * 60;
+
+            System.out.println("실제 역간 거리 초 = " + arrivalTimeSec);
+
+            double curPosition = 1 - (nextStationBalvlDt / (double) arrivalTimeSec);
+            curPosition = Math.floor((curPosition * 10)) / 10.0;
+
+            // 출발인 상태에서 지하철이 최대 80% 만 오도록 설정.
+            if (curPosition >= 0.8) {
+                if (nextStationBalvlDt >= 20) {
+                    realtimePositionResponseDto.setCurPosition(0.7);
+                } else if (nextStationBalvlDt <= 10) {
+                    realtimePositionResponseDto.setCurPosition(0.9);
+                } else {
+                    realtimePositionResponseDto.setCurPosition(0.8);
+                }
+
+            } else {
+                realtimePositionResponseDto.setCurPosition(curPosition);
             }
         }
 
@@ -236,6 +354,11 @@ public class SubwayService {
         // 다음역 리스트 추가
         for (int i = curStationIndex + 1; i < stations.size(); i++) {
 
+            // 현재역이 종착역이면 다음역 리스트 제거
+            if (curStation.equals(endStation)) {
+                break;
+            }
+
             nextStatnsList.add(new StationNameDto.StationName(
                     stations.get(i).getNmKor(), stations.get(i).getNmEng()
             ));
@@ -253,6 +376,7 @@ public class SubwayService {
         realtimePositionResponseDto.setPrevStatns(new StationNameDto(prevStatnsList));
         realtimePositionResponseDto.setNextStatns(new StationNameDto(nextStatnsList));
     }
+
 
     /**
      * 상행방향 역 리스트를 가져온다. (순환열차에 대한 종착역 처리는 하지 않음.)
@@ -278,6 +402,12 @@ public class SubwayService {
 
         // 다음역 리스트 추가
         for (int i = curStationIndex - 1; i >= 0; i--) {
+
+            // 현재역이 종착역이면 다음역 리스트 제거
+            if (curStation.equals(endStation)) {
+                break;
+            }
+
             nextStatnsList.add(new StationNameDto.StationName(
                     stations.get(i).getNmKor(), stations.get(i).getNmEng()
             ));
@@ -524,8 +654,6 @@ public class SubwayService {
             if (dto.getTrainNo().equals(trainNo)) {
                 find = true;
 
-
-
                 // 현재역과 종착역 이름 설정. () 가 들어가는 역이 있는경우 DB에 저장되어있는 역 이름으로 대체.
                 for (Station station : stations) {
                     if (dto.getStatnNm().contains(station.getNmKor())) {
@@ -560,7 +688,6 @@ public class SubwayService {
 
         // 상행과 하행이 반대 방향으로 작동하는 경우, updnLine을 재설정.
         if (trainRouteDirection.isReverse()) updnLine = (updnLine == 0) ? 1 : 0;
-
 
         if (trainRouteDirection.isCycle()) {
             // 내선
@@ -714,29 +841,5 @@ public class SubwayService {
                 null,
                 RealtimeArrivalDto.class
         ).getBody();
-    }
-
-    /**
-     * 호선을 넘겨받아 해당 호선에 운행하는 열차리스트 중 가장 오래 운행할만한 열차를 뽑아 해당 열차로 실시간 정보 반환.
-     */
-    public Object testRealtimePositionTemp(String subwayNm) {
-        RealtimePositionDto realtimePositionDto = (RealtimePositionDto) realtimePositionApi(subwayNm);
-
-        List<Station> stations = stationRepository.findByLineNumOrderByFrCodeAsc(0 + subwayNm);
-        Map<RealtimePositionDto.RealtimePosition, Integer> map = new HashMap<>();
-
-        for (RealtimePositionDto.RealtimePosition realtimePosition : realtimePositionDto.getRealtimePositionList()) {
-            String curStation = realtimePosition.getSubwayNm();
-            String endStation = realtimePosition.getStatnTnm();
-
-            int curStationIndex = getStationIndex(stations, curStation);
-            int endStationIndex = getStationIndex(stations, endStation);
-
-            map.put(realtimePosition, Math.abs(endStationIndex - curStationIndex));
-        }
-
-        List<Map.Entry<RealtimePositionDto.RealtimePosition, Integer>> list = new LinkedList<>(map.entrySet());
-        list.sort(((o1, o2) -> o2.getValue() - o1.getValue()));
-        return getRealTimeSubway(subwayNm, list.get(0).getKey().getTrainNo());
     }
 }
