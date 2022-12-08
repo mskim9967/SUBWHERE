@@ -5,7 +5,7 @@ function ToastNotification(props) {
   const msg = new SpeechSynthesisUtterance();
 
   const speechHandler = (msg) => {
-    msg.text = { kor: props.train + '역 접근', eng: props.train + ' approach' }[props.lang];
+    msg.text = { kor: props.train + '역 진입', eng: props.train + ' approach' }[props.lang];
     window.speechSynthesis.speak(msg);
   };
   useEffect(() => {

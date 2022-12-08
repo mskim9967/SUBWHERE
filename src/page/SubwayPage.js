@@ -21,6 +21,7 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
+import { lightTheme } from '../static/color';
 
 const Alert = React.forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant='filled' {...props} />;
@@ -100,8 +101,8 @@ function SubwayPage({ theme, lang, sound }) {
   const [nexinfo, setNexinfo] = useState([]);
   const colors = ['#0d3692', '#33a23d', '#fe5d10', '#00a2d1', '#8b50a4', '#c55c1d', '#54640d', '#f14c82', '#aa9872'];
   let kakaosubwayNm = searchParams.get('subwayNm'); //subwayNm으로 체크할거임
-  let kakaotrainNo=searchParams.get('trainNo');
-  let kakaocarNo=searchParams.get('carNo');
+  let kakaotrainNo = searchParams.get('trainNo');
+  let kakaocarNo = searchParams.get('carNo');
   const linecolor = colors[kakaosubwayNm.replace('호선', '') - 1]; //subwayNm으로 체크할거임 get.replace~~
   const style = {
     color: theme.gray1,
@@ -127,7 +128,7 @@ function SubwayPage({ theme, lang, sound }) {
           kor: { 0: '역에 진입 하였습니다', 1: '역에 도착하였습니다', 2: '역에서 출발하였습니다', 3: '역에서 출발하였습니다' }[trainfo.trainSttus],
           eng: { 0: ' approach', 1: ' arrival', 2: ' leave', 3: ' leave' }[trainfo.trainSttus],
         }[lang],
-        address: '?subwayNm='+kakaosubwayNm+'&trainNo='+kakaotrainNo+'&carNo='+kakaocarNo
+        address: '?subwayNm=' + kakaosubwayNm + '&trainNo=' + kakaotrainNo + '&carNo=' + kakaocarNo,
       },
     });
   };
@@ -213,7 +214,7 @@ function SubwayPage({ theme, lang, sound }) {
         style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center' }}
         onClick={() => {
           Inforeceive();
-          console.log(trainfo.curPosition)
+          console.log(trainfo.curPosition);
           setTimeState((fontRef.current += 1));
         }}
       >
@@ -454,32 +455,6 @@ function SubwayPage({ theme, lang, sound }) {
               }
             </div>
           </div>
-          <div style={{display:'flex',marginBottom:'20px'}}>
-            {
-              {true:{kor:<div>
-                <div style={{position: 'absolute',zIndex:9,left:23,borderRadius:10,width: '8px',height:'8px',marginTop: '26px',backgroundColor:'black' }}></div>
-                <img src="train_head.png" style={{position: 'absolute',width: '30px',height:'15px',marginTop:'10px', left:5+(Math.abs(trainfo.curPosition)*80)+'%',marginBottom: '50px' }}/>
-                <div style={{position: 'absolute',zIndex:9,left:329,borderRadius:10,width: '8px',height:'8px',marginTop: '26px',backgroundColor:'black' }}></div>
-              <div style={{position: 'absolute',left:30,width: '300px',height:'5px',marginTop:'10px',marginTop: '28px',backgroundColor:linecolor }}></div>
-              <div style={{position: 'absolute',fontWeight:700,left:-110+(trainfo?.statnNm?.kor.length*2),width: '300px',height:'5px',marginTop: '32px' }}>{trainfo?.statnNm?.kor}</div>
-              <div style={{position: 'absolute',fontWeight:700,left:170-(trainfo?.nextStatns?.stationNameList[0]?.kor.length*2),width: '300px',height:'5px',marginTop: '32px' }}>{trainfo?.nextStatns?.stationNameList[0]?.kor}</div>
-              </div>,
-              eng:<div>
-              <div style={{position: 'absolute',zIndex:9,left:23,borderRadius:10,width: '8px',height:'8px',marginTop: '26px',backgroundColor:'black' }}></div>
-              <img src="train_head.png" style={{position: 'absolute',width: '30px',height:'15px',marginTop:'10px', left:5+(Math.abs(trainfo.curPosition)*80)+'%',marginBottom: '50px' }}/>
-              <div style={{position: 'absolute',zIndex:9,left:329,borderRadius:10,width: '8px',height:'8px',marginTop: '26px',backgroundColor:'black' }}></div>
-            <div style={{position: 'absolute',left:30,width: '300px',height:'5px',marginTop:'10px',marginTop: '28px',backgroundColor:linecolor }}></div>
-            <div style={{position: 'absolute',fontWeight:700,left:-110+(trainfo?.statnNm?.eng.length*2),width: '300px',height:'5px',marginTop: '32px' }}>{trainfo?.statnNm?.eng}</div>
-            <div style={{position: 'absolute',fontWeight:700,left:150-(trainfo?.nextStatns?.stationNameList[0]?.eng.length*2),width: '300px',height:'5px',marginTop: '32px' }}>{trainfo?.nextStatns?.stationNameList[0]?.eng}</div>
-            </div>
-            
-            }[lang]
-              ,
-            false:''}[nowtrain]
-            }
-            
-          </div>
-          
 
           <Snackbar open={toastState} autoHideDuration={4000}>
             <Alert severity='info' sx={{ width: '70%', margin: '0 auto 10vh auto', fontSize: '17px' }}>
@@ -505,6 +480,7 @@ function SubwayPage({ theme, lang, sound }) {
         <div
           style={{
             display: 'flex',
+            position: 'relative',
             alignItems: 'center',
             height: '60px',
             fontSize: '13px',
@@ -515,6 +491,48 @@ function SubwayPage({ theme, lang, sound }) {
             borderRadius: '20px',
           }}
         >
+          {/* <div
+            style={{
+              padding: '15px',
+              position: 'absolute',
+              marginTop: '-115px',
+              width: 'calc(100% - 30px)',
+              boxSizing: 'border-box',
+              display: 'block',
+            }}
+          >
+            <svg
+              style={{ width: '30px', float: 'left', left: `${trainfo.curPosition * 100}%`, position: 'relative' }}
+              version='1.0'
+              xmlns='http://www.w3.org/2000/svg'
+              width='838.000000pt'
+              height='433.000000pt'
+              viewBox='0 0 838.000000 433.000000'
+              preserveAspectRatio='xMidYMid meet'
+            >
+              <g transform='translate(0.000000,433.000000) scale(0.100000,-0.100000)' fill={linecolor} stroke='none'>
+                <path
+                  d='M906 4319 c-208 -30 -427 -128 -579 -257 -118 -101 -234 -262 -278
+-389 -50 -144 -49 -120 -49 -1289 l0 -1094 4191 0 4192 0 -6 163 c-4 137 -9
+180 -35 277 -46 178 -162 400 -311 594 -405 530 -1184 1190 -1700 1442 -476
+233 -1049 412 -1611 504 -387 63 -289 60 -2100 59 -910 -1 -1682 -5 -1714 -10z
+m5745 -996 c166 -118 365 -274 519 -407 123 -107 386 -362 472 -458 l60 -68
+-515 0 -514 0 -62 63 c-106 108 -182 239 -223 382 -20 68 -23 102 -23 230 1
+162 13 227 62 338 l26 57 26 -16 c14 -9 92 -63 172 -121z m-2871 -623 l0 -540
+-560 0 -560 0 0 540 0 540 560 0 560 0 0 -540z m1930 0 l0 -540 -560 0 -560 0
+0 540 0 540 560 0 560 0 0 -540z m-3860 -10 l0 -540 -560 0 -560 0 0 540 0
+540 560 0 560 0 0 -540z'
+                />
+                <path
+                  d='M2 953 c6 -197 25 -275 100 -413 143 -262 414 -455 733 -521 87 -18
+208 -19 3346 -19 3538 0 3328 -3 3496 54 363 124 626 403 689 733 8 41 14 133
+14 204 l0 129 -4191 0 -4191 0 4 -167z'
+                />
+              </g>
+            </svg>
+          </div> */}
+
+          {/* trainfo.curPosition */}
           <div
             style={{
               width: '90px',
