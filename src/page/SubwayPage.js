@@ -458,7 +458,7 @@ function SubwayPage({ theme, lang, sound }) {
 
           <Snackbar open={toastState} autoHideDuration={4000}>
             <Alert severity='info' sx={{ width: '70%', margin: '0 auto 10vh auto', fontSize: '17px' }}>
-              {{ kor: trainfo?.statnNm?.kor + '역 접근', eng: trainfo?.statnNm?.eng + ' approach' }[lang]}
+              {{ kor: trainfo?.statnNm?.kor + '역 진입', eng: trainfo?.statnNm?.eng + ' approach' }[lang]}
             </Alert>
           </Snackbar>
 
