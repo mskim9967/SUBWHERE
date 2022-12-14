@@ -1,0 +1,40 @@
+{
+  "expo": {
+    "name": "SUBWHERE-Admin",
+    "slug": "subwhere-admin",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.mskim9967.subwhereadmin"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#FAFEFF"
+      },
+      "permissions": ["android.permission.NFC"],
+      "package": "com.mskim9967.subwhereadminTest"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": ["react-native-nfc-manager"],
+    "extra": {
+      "eas": {
+        "projectId": "ce6bc4e9-1da1-47db-a7ff-a54080a0cf09"
+      }
+    }
+  }
+}
