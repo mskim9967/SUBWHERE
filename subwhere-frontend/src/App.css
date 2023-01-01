@@ -1,0 +1,108 @@
+.App {
+  text-align: center;
+}
+a {
+  text-decoration: none;
+}
+.wrapModal {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 300px;
+  border: '2px solid ';
+  transform: translate(-50%, -50%);
+  max-height: 50vh;
+  border-radius: 7px;
+  box-shadow: 24px;
+  overflow-y: scroll;
+  padding: 5px;
+}
+
+.sms {
+  display: block;
+  text-align: center;
+  width: 100%;
+}
+.toast-alert {
+  background-color: rgba(255, 127, 80, 1);
+  border: 1px solid rgba(255, 127, 80, 0.1);
+  border-radius: 10px;
+  box-shadow: 0 0.5rem 1rem rgb(0 0 0 / 15%);
+  height: 40px;
+  width: 250px;
+  padding: 5px;
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: black;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  position: absolute;
+  bottom: 140px;
+  margin: 0;
+}
+
+.toast-alert img {
+  width: 25px;
+  height: auto;
+  margin-right: 10px;
+}
+
+.toast-alert p {
+  margin: 0;
+}
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+html,
+body {
+  position: fixed;
+}
+
+body {
+  margin: 0;
+  position: fixed;
+  -ms-overflow-style: none;
+  /* disable ios scroll refresh  */
+  overscroll-behavior: contain;
+  overscroll-behavior-y: contain;
+  overflow: hidden;
+}
+
+div#scrollbarDisable::-webkit-scrollbar {
+  display: none;
+}
