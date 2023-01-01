@@ -1,0 +1,95 @@
+
+= OTTitor API Document
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+:toc: left
+:toclevels: 3
+:sectlinks:
+:docinfo: shared-head
+
+&nbsp;
+
+&nbsp;
+
+&nbsp;
+
+
+== 소셜 로그인
+
+=== 인증
+
+==== 토큰 재발급
+
+Access token이 만료되었을 때 해당 방식으로 토큰을 재발급합니다
+
+operation::토큰재발급[snippets='http-request,request-fields,http-response,response-fields']
+
+Refresh token이 발급된지 30일이 넘었다면 재발급이 불가합니다.
+
+새로 로그인해주세요.
+
+&nbsp;
+
+&nbsp;
+
+&nbsp;
+
+=== 로그인
+
+==== 카카오
+operation::카카오로그인[snippets='http-request,request-headers,http-response,response-fields']
+
+&nbsp;
+
+&nbsp;
+
+&nbsp;
+
+== 회원
+=== 내 정보
+==== 조회
+operation::내정보조회[snippets='http-request,request-headers,http-response,response-fields']
+
+&nbsp;
+
+&nbsp;
+
+&nbsp;
+
+==== 수정
+
+*프로필 이미지 변경은 이 API로 불가능합니다*
+
+operation::내정보변경[snippets='http-request,request-headers,request-fields,http-response,response-fields']
+
+&nbsp;
+
+&nbsp;
+
+&nbsp;
+
+==== 탈퇴
+
+구글 회원일 시 access_token을, 애플 회원일 시 code를 body에 넣어 보내주세요.
+
+operation::회원탈퇴[snippets='http-request,request-fields,request-headers,http-response,response-fields']
+
+&nbsp;
+
+&nbsp;
+
+&nbsp;
+
+=== 파일 업로드
+==== 단일
+operation::단일파일업로드[snippets='http-request,path-parameters,request-parameters,request-parts,http-response,response-fields']
+
+&nbsp;
+
+&nbsp;
+
+&nbsp;
+
+==== 복수
+operation::복수파일업로드[snippets='http-request,path-parameters,request-parameters,request-parts,http-response,response-fields']
