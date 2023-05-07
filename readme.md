@@ -222,7 +222,7 @@
 <tbody>
     <tr>
       <td align="center">김명승(PM)</td>
-      <td align="center">중앙대학교 소프트웨어학부</td>
+      <td align="center">소프트웨어학부</td>
       <td align="center">기획, UI Design<br/>Dev(Admin Application, Infra)</td>
       <td align="center">	
         <a href="https://github.com/mskim9967">
@@ -232,7 +232,7 @@
     </tr>
     <tr>
       <td align="center">문성준</td>
-      <td align="center">중앙대학교 소프트웨어학부</td>
+      <td align="center">소프트웨어학부</td>
       <td align="center">Dev(Frontend)</td>
       <td align="center">	
         <a href="https://github.com/moon5381">
@@ -242,7 +242,7 @@
     </tr>
     <tr>
       <td align="center">배정우</td>
-      <td align="center">중앙대학교 소프트웨어학부</td>
+      <td align="center">소프트웨어학부</td>
       <td align="center">Dev(Backend)</td>
       <td align="center">	
         <a href="https://github.com/wjddn2165">
