@@ -15,12 +15,12 @@
     <br />
     <br />
   </p>
-  
 </div>
 <br />
+
+[발표자료 보기(pdf, 22MB)](https://github.com/mskim9967/SUBWHERE/files/11447715/team2_SUBWHERE_presentation_material.pdf)
+
 <br />
-
-
 
 # About This Project
 
